@@ -1,0 +1,44 @@
+#map-display { 
+    width: 100%; 
+    height: 400px;
+}
+
+#map-block { 
+    float:right; 
+    width:70%;
+}
+
+#map-links {
+    float:left;
+    width: 25%;
+}
+
+#map-links ul {
+    margin-left:0;
+}
+
+#map-links li {
+    overflow:hidden; 
+    border-bottom:1px dotted #ccc;
+}
+
+#map-links li a {
+    display:block;
+    text-decoration:none; 
+}
+
+
+/* The map for the items page needs a bit of styling on it */
+#address_balloon dt {
+    font-weight: bold;
+}
+#address_balloon {
+    width: 100px;
+}
+
+div.map-notification {
+    display:block;
+    border: 1px dotted #ccc;
+    text-align:center;
+    font-size: 2em;
+}
