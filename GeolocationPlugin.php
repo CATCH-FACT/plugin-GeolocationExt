@@ -298,19 +298,23 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $db = $this->_db;
         $select = $args['select'];
         $alias = $this->_db->getTable('Location')->getTableAlias();
-        if(isset($args['params']['geolocation-address'])) {
+        if(isset($args['params']['geolocation-adm1'])) {
+            $province = trim($args['params']['geolocation-adm1']);
+            $select->where('administrative_area_level_1 LIKE ');
+               //ORDER by the closest distances
+               $select->order('distance');
             
+        }
+        else if(isset($args['params']['geolocation-address'])) {
             
             // Get the address, latitude, longitude, and the radius from parameters
             $address = trim($args['params']['geolocation-address']);
             $currentLat = trim($args['params']['geolocation-latitude']);
             $currentLng = trim($args['params']['geolocation-longitude']);
             $radius = trim($args['params']['geolocation-radius']);
-        
             
             if ( (isset($args['params']['only_map_items']) && $args['params']['only_map_items'] ) || $address != '') {
                 //INNER JOIN the locations table
-
                 $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id",
                             array('latitude', 'longitude', 'address'));                    
             }
@@ -324,12 +328,12 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 //ORDER by the closest distances
                 $select->order('distance');
             }
-        } else if( isset($args['params']['only_map_items'])) {
-            
+        } else if( isset($args['params']['only_map_items'])){
             $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id",
-                    array());            
+                    array());
+        } else{
+            $select = null;
         }
-        
     }
         
     public function filterAdminNavigationMain($navArray)
