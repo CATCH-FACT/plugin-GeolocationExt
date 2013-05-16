@@ -84,6 +84,18 @@
     </div>
 </div>
 
+<div class="field">
+    <div class="two columns alpha">
+        <label for="geolocation_public_search_fields">The geographical fields that are searchable in the search form</label>    
+    </div>
+    <div class="inputs five columns omega">
+        <p class="explanation">Add or remove fields on the search form here.</p>
+        <div class="input-block">        
+            <textarea class="textinput"  name="geolocation_public_search_fields" rows="6"><?php echo get_option('geolocation_public_search_fields'); ?></textarea>        
+        </div>
+    </div>
+    
+</div>
 
 <div class="field">
     <div class="two columns alpha">

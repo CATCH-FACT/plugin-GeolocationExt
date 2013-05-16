@@ -19,11 +19,9 @@
         $location = $locations[$item->id];
         ?>
         <Placemark>
-            <name><![CDATA[<?php echo metadata('item', array('Dublin Core', 'Title'));?>]]></name>
-            <namewithlink><![CDATA[<?php echo link_to_item(metadata('item' , array('Dublin Core', 'Title')), array('class' => 'view-item')); ?>]]></namewithlink>
-            <Snippet maxLines="2"><![CDATA[<?php
-            echo metadata('item', array('Dublin Core', 'Description'), array('snippet' => 150));
-            ?>]]></Snippet>    
+            <name><![CDATA[<?php echo metadata('item', array('Dublin Core', 'Identifier')) . " - " . metadata('item', array('Dublin Core', 'Title'));?>]]></name>
+            <namewithlink><![CDATA[<?php echo link_to_item(metadata('item' , array('Dublin Core', 'Identifier')), array('class' => 'view-item')); ?>]]></namewithlink>
+            <Snippet maxLines="2"><![CDATA[<?php echo metadata('item', array('Dublin Core', 'Description'), array('snippet' => 150));   ?>]]></Snippet>    
             <description><![CDATA[<?php 
             // @since 3/26/08: movies do not display properly on the map in IE6, 
             // so can't use display_files(). Description field contains the HTML 

@@ -3,7 +3,7 @@
 $request = Zend_Controller_Front::getInstance()->getRequest();
 
 // Get the address, latitude, longitude, and the radius from parameters
-$address = trim($request->getParam('geolocation-address'));
+$address = trim($request->getParam('geolocation_address'));
 $currentLat = trim($request->getParam('geolocation-latitude'));
 $currentLng = trim($request->getParam('geolocation-longitude'));
 $radius = trim($request->getParam('geolocation-radius'));
@@ -11,32 +11,43 @@ $radius = trim($request->getParam('geolocation-radius'));
 if (empty($radius)) {
     $radius = 10; // 10 miles
 }
-
-
 ?>
 
 <div class="field">
-    <?php echo $this->formLabel('geolocation-address', __('Geographic Address')); ?>
+    <?php echo $this->formLabel('geolocation_address', __('Geographic Address') . " (Plaats van vertellen)"); ?>
     <div class="inputs">
-        <?php echo $this->formText('geolocation-address',  $address, array('name'=>'geolocation-address','size' => '40','id'=>'geolocation-address','class'=>'textinput')); ?>
+        <?php echo $this->formText('geolocation_address',  $address, array('name'=>'geolocation_address','size' => '40','id'=>'geolocation_address','class'=>'textinput')); ?>
         <?php echo $this->formHidden('geolocation-latitude', $currentLat, array('name'=>'geolocation-latitude','id'=>'geolocation-latitude')); ?>
         <?php echo $this->formHidden('geolocation-longitude', $currentLng, array('name'=>'geolocation-longitude','id'=>'geolocation-longitude')); ?>
         <?php echo $this->formHidden('geolocation-radius', $radius, array('name'=>'geolocation-radius','id'=>'geolocation-radius')); ?>
     </div>
-</div>
-
-<div class="field">
+    
 	<?php echo $this->formLabel('geolocation-radius', __('Geographic Radius (miles)')); ?>
 	<div class="inputs">
         <?php echo $this->formText('geolocation-radius', $radius, array('name'=>'geolocation-radius','size' => '40','id'=>'geolocation-radius','class'=>'textinput')); ?>
     </div>
+
+    <center>
+    <table width=90%>
+    <?php
+    foreach(explode("\n", get_option("geolocation_public_search_fields")) as $geo_field):?>
+        <?php $search_value = trim($request->getParam($geo_field)); ?>
+        <tr>
+        <td><div><?php echo $geo_field;?></div></td>
+        <td>
+            <?php echo $this->formText($geo_field, $search_value, array('name' => $geo_field, 'size' => '40', 'id' => $geo_field, 'class'=>'textinput', "style" => "margin-bottom:0"));?>
+        </td>
+        </tr>
+    <?php endforeach; ?>
+    </table>
 </div>
 
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>
 <script type="text/javascript">
     var options = {
 	    types: []
     };
-	var input = document.getElementById('geolocation-address');
+	var input = document.getElementById('geolocation_address');
 	var autocomplete = new google.maps.places.Autocomplete(input, options);
 
     jQuery(document).ready(function() {

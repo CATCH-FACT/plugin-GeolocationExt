@@ -4,9 +4,9 @@
     
     $css = "
             #map_browse {
-                width: 569px;
+                width: 540px;
                 height: 436px;
-        		float:left;
+        		float:right;
         		border:1px solid #ccc; border-width: 1px 1px 1px 0;
             }
         	.balloon {width:400px !important; font-size:1.2em;}
