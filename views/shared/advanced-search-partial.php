@@ -14,24 +14,35 @@ if (empty($radius)) {
 ?>
 
 <div class="field">
-    <?php echo $this->formLabel('geolocation_address', __('Geographic Address') . " (Plaats van vertellen)"); ?>
-    <div class="inputs">
-        <?php echo $this->formText('geolocation_address',  $address, array('name'=>'geolocation_address','size' => '40','id'=>'geolocation_address','class'=>'textinput')); ?>
-        <?php echo $this->formHidden('geolocation-latitude', $currentLat, array('name'=>'geolocation-latitude','id'=>'geolocation-latitude')); ?>
-        <?php echo $this->formHidden('geolocation-longitude', $currentLng, array('name'=>'geolocation-longitude','id'=>'geolocation-longitude')); ?>
-        <?php echo $this->formHidden('geolocation-radius', $radius, array('name'=>'geolocation-radius','id'=>'geolocation-radius')); ?>
-    </div>
-    
-	<?php echo $this->formLabel('geolocation-radius', __('Geographic Radius (miles)')); ?>
-	<div class="inputs">
-        <?php echo $this->formText('geolocation-radius', $radius, array('name'=>'geolocation-radius','size' => '40','id'=>'geolocation-radius','class'=>'textinput')); ?>
-    </div>
-
     <center>
     <table width=90%>
+    <tr>
+        <td><div>
+            <?php echo __('Geographic Address') . " (Plaats van vertellen)"; ?></div>
+        </td>
+        <td>
+            <?php echo $this->formText('geolocation_address',  $address, array('name'=>'geolocation_address','size' => '40','id'=>'geolocation_address','class'=>'textinput', "style" => "margin-bottom:0")); ?>
+            <?php echo $this->formHidden('geolocation-latitude', $currentLat, array('name'=>'geolocation-latitude','id'=>'geolocation-latitude')); ?>
+            <?php echo $this->formHidden('geolocation-longitude', $currentLng, array('name'=>'geolocation-longitude','id'=>'geolocation-longitude')); ?>
+            <?php echo $this->formHidden('geolocation-radius', $radius, array('name'=>'geolocation-radius','id'=>'geolocation-radius')); ?>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <?php echo $this->formLabel('geolocation-radius', __('Geographic Radius (miles)')); ?>
+        </td>
+        <td>
+            <?php echo $this->formText('geolocation-radius', $radius, array('name'=>'geolocation-radius','size' => '10','id'=>'geolocation-radius','class'=>'textinput', "style" => "margin-bottom:0")); ?>
+        </td>
+    </tr>
+    <tr>
+        <td></td>
+        <td>OR</td>
+    </tr>
     <?php
     foreach(explode("\n", get_option("geolocation_public_search_fields")) as $geo_field):?>
-        <?php $search_value = trim($request->getParam($geo_field)); ?>
+        <?php $search_value = trim($request->getParam($geo_field)); 
+        $geo_field = trim($geo_field)?>
         <tr>
         <td><div><?php echo $geo_field;?></div></td>
         <td>
@@ -42,7 +53,7 @@ if (empty($radius)) {
     </table>
 </div>
 
-<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>
+<!--<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>-->
 <script type="text/javascript">
     var options = {
 	    types: []

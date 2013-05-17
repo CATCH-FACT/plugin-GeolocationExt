@@ -1,7 +1,7 @@
 <?php
 
 define('GOOGLE_MAPS_API_VERSION', '3.x');
-define('GEOLOCATION_MAX_LOCATIONS_PER_PAGE', 250);
+define('GEOLOCATION_MAX_LOCATIONS_PER_PAGE', 1000);
 define('GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE', 50);
 define('GEOLOCATION_PLUGIN_DIR', PLUGIN_DIR . '/Geolocation');
 
@@ -121,7 +121,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_default_zoom_level', '5');
         set_option('geolocation_per_page', GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE);
         set_option('geolocation_add_map_to_contribution_form', '1');   
-
+        set_option('geolocation_use_metric_distances', '1'); 
+        
         set_option('geolocation_gmaps_key', "AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o");
         
         set_option('geolocation_public_search_fields', implode(",",$this->_all_geo_fields));
@@ -135,9 +136,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         delete_option('geolocation_default_zoom_level');
         delete_option('geolocation_per_page');
         delete_option('geolocation_add_map_to_contribution_form');
-        
+        delete_option('geolocation_use_metric_distances');
         // This is for older versions of Geolocation, which used to store a Google Map API key.
         delete_option('geolocation_gmaps_key');
+        delete_option('geolocation_public_search_fields');
         
         // Drop the Location table
         $db = get_db();
@@ -169,6 +171,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_add_map_to_contribution_form', $_POST['geolocation_add_map_to_contribution_form']);
         set_option('geolocation_link_to_nav', $_POST['geolocation_link_to_nav']);        
         set_option('geolocation_public_search_fields', $_POST['geolocation_public_search_fields']);
+        set_option('geolocation_use_metric_distances', $_POST['geolocation_use_metric_distances']); 
     }
     
     public function hookDefineAcl($args)
@@ -324,15 +327,82 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         echo $view->partial('advanced-search-partial.php', array('searchFormId'=>'advanced-search-form', 'searchButtonId'=>'submit_search_advanced'));
     }
     
+    
     public function hookItemsBrowseSql($args)
+        {
+            $db = $this->_db;
+            $select = $args['select'];
+            $alias = $this->_db->getTable('Location')->getTableAlias();
+            
+            $specific_search = False;
+            foreach($this->_all_geo_fields as $geo_field){
+#                print $geo_field . " - <br>";
+                if(isset($args['params'][$geo_field])) {
+#                    print $args['params'][$geo_field] . " isset <br>";
+                    if ($args['params'][$geo_field]){
+#                        print $args['params'][$geo_field] . " ifilled <br>";
+                        $specific_search = True;
+                        $field_type = trim($args['params'][$geo_field]);
+                        $select->where($geo_field . ' LIKE "%' . $field_type . '%"');
+                    }
+                }
+            }
+            if ($specific_search){
+#                print "SPECIFIC SEARCH";
+                $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array());
+                //ORDER by the closest distances
+                $select->order('locality');
+            }
+            //else
+             if(isset($args['params']['geolocation-address'])) {
+
+                // Get the address, latitude, longitude, and the radius from parameters
+                $address = trim($args['params']['geolocation-address']);
+                $currentLat = trim($args['params']['geolocation-latitude']);
+                $currentLng = trim($args['params']['geolocation-longitude']);
+                $radius = trim($args['params']['geolocation-radius']);
+
+
+                if ( (isset($args['params']['only_map_items']) && $args['params']['only_map_items'] ) || $address != '') {
+                    //INNER JOIN the locations table
+
+                    $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id",
+                                array('latitude', 'longitude', 'address'));                    
+                }
+                // Limit items to those that exist within a geographic radius if an address and radius are provided
+                if ($address != '' && is_numeric($currentLat) && is_numeric($currentLng) && is_numeric($radius)) {
+                    // SELECT distance based upon haversine forumula
+                    $select->columns('3956 * 2 * ASIN(SQRT(  POWER(SIN(('.$currentLat.' - locations.latitude) * pi()/180 / 2), 2) + COS('.$currentLat.' * pi()/180) *  COS(locations.latitude * pi()/180) *  POWER(SIN(('.$currentLng.' -locations.longitude) * pi()/180 / 2), 2)  )) as distance');
+                    // WHERE the distance is within radius miles/kilometers of the specified lat & long
+                    if (get_option('geolocation_use_metric_distances')) {
+                        $denominator = 111;
+                    } else {
+                        $denominator = 69;
+                    }
+
+                    $select->where('(latitude BETWEEN '.$currentLat.' - ' . $radius . '/'.$denominator.' AND ' . $currentLat . ' + ' . $radius .  '/'.$denominator.')
+                 AND (longitude BETWEEN ' . $currentLng . ' - ' . $radius . '/'.$denominator.' AND ' . $currentLng  . ' + ' . $radius .  '/'.$denominator.')');
+                    //ORDER by the closest distances
+                    $select->order('distance');
+                }
+            } else if( isset($args['params']['only_map_items']) AND !$specific_search) {
+                $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array());
+            }
+        }
+    
+    public function hookItemsBrowseSqlOLD($args)
     {
         $specific_search = False;
         $db = $this->_db;
         $select = $args['select'];
+        print "PRE SELECT " . $select . "<br>";
         $alias = $this->_db->getTable('Location')->getTableAlias();
         foreach($this->_all_geo_fields as $geo_field){
+            print $geo_field . " - <br>";
             if(isset($args['params'][$geo_field])) {
+                print $args['params'][$geo_field] . " isset <br>";
                 if ($args['params'][$geo_field]){
+                    print $args['params'][$geo_field] . " ifilled <br>";
                     $specific_search = True;
                     $field_type = trim($args['params'][$geo_field]);
                     $select->where($geo_field . ' LIKE "%' . $field_type . '%"');
@@ -340,12 +410,13 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             }
         }
         if ($specific_search){
+            print "SPECIFIC SEARCH";
             $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array('latitude', 'longitude', 'address'));
             //ORDER by the closest distances
             $select->order('locality');
         }
         else if(isset($args['params']['geolocation-address'])) {
-            print "<br>";
+            print "<br>'''''''";
             print $args['params']['geolocation-address'];
             // Get the address, latitude, longitude, and the radius from parameters
             $address = trim($args['params']['geolocation-address']);
@@ -368,12 +439,14 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 //ORDER by the closest distances
                 $select->order('distance');
             }
-        } else if( isset($args['params']['only_map_items'])){
+        } else if(isset($args['params']['only_map_items'])){
+            print 'isset($args["params"]["only_map_items"])';
             $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array());
         } else{
+            print "select = null";
             $select = null;
         }
-        print $select;
+        print "<br>" . $select . "<br>";
     }
         
     public function filterAdminNavigationMain($navArray)
@@ -407,8 +480,31 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         return $tabs;     
     }
     
-    public function filterPublicNavigationItems($navArray)
+    /**
+     * Return HTML for a link to the item search form.
+     *
+     * @package Omeka\Function\View\Navigation
+     * @param string $text Text of the link. Default is 'Search Items'.
+     * @param array $props HTML attributes for the link.
+     * @param string $uri Action for the form.  Defaults to 'items/browse'.
+     * @return string
+     */
+    function link_to_map_search()
     {
+        $uri = 'geolocation/map/browse';
+        $props = $uri . (!empty($_SERVER['QUERY_STRING']) ? '?' . $_SERVER['QUERY_STRING'] : '');
+        return $props;
+#        return '<a ' . tag_attributes($props) . '>' . $text . '</a>';
+    }
+    
+    public function filterPublicNavigationItems($navArray){
+#        if (get_option('geolocation_see_results_on_map')) {
+#        print $this->link_to_map_search() . "<br><br><br>";
+        $navArray['Results on map'] = array(
+                                        'label'=>__('Results on map'),
+                                        'uri' => url($this->link_to_map_search())
+                                        );
+#        }
         if (get_option('geolocation_link_to_nav')) {
             $navArray['Browse Map'] = array(
                                             'label'=>__('Browse Map'),
@@ -428,9 +524,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
      **/    
     protected function _mapForm($item, $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null)
     {
-#        $this->geolocation_autocomplete();
-#        echo '<script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places&key=' . $key . '&language='.$lang.'"></script>';
-        
         $html = '';
         
         $center = $this->_getCenter();

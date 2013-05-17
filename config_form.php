@@ -73,6 +73,19 @@
 
 <div class="field">
     <div class="two columns alpha">
+        <label for="geolocation_use_metric_distances"><?php echo __('Use metric distances'); ?></label>    
+    </div>    
+    <div class="inputs five columns omega">
+        <p class="explanation"><?php echo __('Use metric distances in proximity search.'); ?></p>
+        <div class="input-block">        
+        <?php echo get_view()->formCheckbox('geolocation_use_metric_distances', true, 
+         array('checked'=>(boolean)get_option('geolocation_use_metric_distances'))); ?>        
+        </div>
+    </div>
+</div>
+
+<div class="field">
+    <div class="two columns alpha">
         <label for="geolocation_link_to_nav">Add Link to Map on Items/Browse Navigation</label>    
     </div>    
     <div class="inputs five columns omega">
