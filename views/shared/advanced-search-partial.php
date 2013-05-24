@@ -46,7 +46,7 @@ if (empty($radius)) {
         <tr>
         <td><div><?php echo $geo_field;?></div></td>
         <td>
-            <?php echo $this->formText($geo_field, $search_value, array('name' => $geo_field, 'size' => '40', 'id' => $geo_field, 'class'=>'textinput', "style" => "margin-bottom:0"));?>
+            <?php echo $this->formText("geolocation-".$geo_field, $search_value, array('name' => "geolocation-".$geo_field, 'size' => '40', 'id' => "geolocation-".$geo_field, 'class'=>'textinput', "style" => "margin-bottom:0"));?>
         </td>
         </tr>
     <?php endforeach; ?>
