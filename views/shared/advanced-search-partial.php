@@ -21,15 +21,15 @@ if (empty($radius)) {
             <?php echo __('Geographic Address') . " (Plaats van vertellen)"; ?></div>
         </td>
         <td>
-            <?php echo $this->formText('geolocation_address',  $address, array('name'=>'geolocation_address','size' => '40','id'=>'geolocation_address','class'=>'textinput', "style" => "margin-bottom:0")); ?>
-            <?php echo $this->formHidden('geolocation-latitude', $currentLat, array('name'=>'geolocation-latitude','id'=>'geolocation-latitude')); ?>
+            <?php echo $this->formText('geolocation-address',  $address, array('name'=>'geolocation-address','size' => '40','id'=>'geolocation-address','class'=>'textinput', "style" => "margin-bottom:0")); ?>
+            <?php echo $this->formText('geolocation-latitude', $currentLat, array('name'=>'geolocation-latitude','id'=>'geolocation-latitude')); ?>
             <?php echo $this->formHidden('geolocation-longitude', $currentLng, array('name'=>'geolocation-longitude','id'=>'geolocation-longitude')); ?>
             <?php echo $this->formHidden('geolocation-radius', $radius, array('name'=>'geolocation-radius','id'=>'geolocation-radius')); ?>
         </td>
     </tr>
     <tr>
         <td>
-            <?php echo $this->formLabel('geolocation-radius', __('Geographic Radius (miles)')); ?>
+            <?php echo $this->formLabel('geolocation-radius', __('Geographic Radius (km)')); ?>
         </td>
         <td>
             <?php echo $this->formText('geolocation-radius', $radius, array('name'=>'geolocation-radius','size' => '10','id'=>'geolocation-radius','class'=>'textinput', "style" => "margin-bottom:0")); ?>
@@ -53,12 +53,12 @@ if (empty($radius)) {
     </table>
 </div>
 
-<!--<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>-->
+<!--<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script> CAUSES A BUNCH OF PROBLEMS-->
 <script type="text/javascript">
     var options = {
 	    types: []
     };
-	var input = document.getElementById('geolocation_address');
+	var input = document.getElementById('geolocation-address');
 	var autocomplete = new google.maps.places.Autocomplete(input, options);
 
     jQuery(document).ready(function() {

@@ -260,8 +260,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }        
     }
     
-    public function hookPublicHead($args)
-    {
+    public function hookPublicHead($args){
+        $key = get_option('geolocation_gmaps_key') ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';
+        $lang = "nl";
         $view = $args['view'];
         $view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
         $request = Zend_Controller_Front::getInstance()->getRequest();
@@ -276,7 +277,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                          || ($controller == 'items') )  {
             queue_css_file('geolocation-items-map');
             queue_css_file('geolocation-marker');
-            queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
+#            queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
+            queue_js_url("https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places&key=$key&language=$lang");
             queue_js_file('map');
         }        
     }
@@ -354,8 +356,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 $select->order('locality');
             }
             //else
-             if(isset($args['params']['geolocation-address'])) {
-
+            if(isset($args['params']['geolocation-address'])) {
+                
                 // Get the address, latitude, longitude, and the radius from parameters
                 $address = trim($args['params']['geolocation-address']);
                 $currentLat = trim($args['params']['geolocation-latitude']);
@@ -388,6 +390,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             } else if( isset($args['params']['only_map_items']) AND !$specific_search) {
                 $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array());
             }
+            _log("GEOLOCATION PLUGIN SELECT STATEMENT:\n" . $select);
         }
     
     public function hookItemsBrowseSqlOLD($args)
@@ -416,7 +419,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $select->order('locality');
         }
         else if(isset($args['params']['geolocation-address'])) {
-            print "<br>'''''''";
             print $args['params']['geolocation-address'];
             // Get the address, latitude, longitude, and the radius from parameters
             $address = trim($args['params']['geolocation-address']);
