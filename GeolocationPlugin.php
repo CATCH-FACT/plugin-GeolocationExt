@@ -337,12 +337,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $alias = $this->_db->getTable('Location')->getTableAlias();
             $specific_search = False;
             foreach($this->_all_geo_fields as $geo_field){
-#                print "- " . $geo_field . " - <br>";
                 if(isset($args['params']["geolocation-".$geo_field])) {
                     $specific_search = True;
-#                    print $args['params'][$geo_field] . " isset <br>";
                     if ($args['params']["geolocation-".$geo_field]){
-#                        print $args['params'][$geo_field] . " ifilled <br>";
                         $field_type = trim($args['params']["geolocation-".$geo_field]);
                         $select->where($geo_field . ' LIKE "%' . $field_type . '%"');
                     }
@@ -440,7 +437,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     
     public function filterPublicNavigationItems($navArray){
 #        if (get_option('geolocation_see_results_on_map')) {
-#        print $this->link_to_map_search() . "<br><br><br>";
         $navArray['Results on map'] = array(
                                         'label'=>__('Results on map'),
                                         'uri' => url($this->link_to_map_search())

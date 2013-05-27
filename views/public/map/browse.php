@@ -30,13 +30,11 @@ echo head(array('title' => __('Browse Map'),'bodyid'=>'map','bodyclass' => 'brow
 </nav>
 
 <?php echo pagination_links(); ?>
-<br>
-<br>
-<br>
+
 
 <div id="primary">
 
-    <div id="map_block">
+    <div id="map_block" style="inline">
         <?php echo $this->googleMap('map_browse', array('loadKml'=>true, 'list'=>'map-links'));?>
     </div><!-- end map_block -->
 
