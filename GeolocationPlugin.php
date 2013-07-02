@@ -419,12 +419,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     }
     
     /**
-     * Return HTML for a link to the item search form.
+     * Return HTML for a link to the same search visualized on a map
      *
-     * @package Omeka\Function\View\Navigation
-     * @param string $text Text of the link. Default is 'Search Items'.
-     * @param array $props HTML attributes for the link.
-     * @param string $uri Action for the form.  Defaults to 'items/browse'.
+     * 
      * @return string
      */
     function link_to_map_search()
@@ -437,6 +434,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     
     public function filterPublicNavigationItems($navArray){
 #        if (get_option('geolocation_see_results_on_map')) {
+#        print "<pre>MAP SEARCH: " . $this->link_to_map_search()."</pre>";
         $navArray['Results on map'] = array(
                                         'label'=>__('Results on map'),
                                         'uri' => url($this->link_to_map_search())
@@ -449,7 +447,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                                             );
         }
         return $navArray;        
-    }     
+    }
     
     
     /**
