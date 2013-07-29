@@ -24,7 +24,7 @@ if (empty($radius)) {
             <?php echo $this->formText('geolocation-address',  $address, array('name'=>'geolocation-address','size' => '40','id'=>'geolocation-address','class'=>'textinput', "style" => "margin-bottom:0")); ?>
             <?php echo $this->formText('geolocation-latitude', $currentLat, array('name'=>'geolocation-latitude','id'=>'geolocation-latitude')); ?>
             <?php echo $this->formHidden('geolocation-longitude', $currentLng, array('name'=>'geolocation-longitude','id'=>'geolocation-longitude')); ?>
-            <?php echo $this->formHidden('geolocation-radius', $radius, array('name'=>'geolocation-radius','id'=>'geolocation-radius')); ?>
+            <?php #echo $this->formHidden('geolocation-radius', $radius, array('name'=>'geolocation-radius','id'=>'geolocation-radius')); ?>
         </td>
     </tr>
     <tr>

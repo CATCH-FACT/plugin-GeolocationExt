@@ -337,11 +337,13 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $alias = $this->_db->getTable('Location')->getTableAlias();
             $specific_search = False;
             foreach($this->_all_geo_fields as $geo_field){
-                if(isset($args['params']["geolocation-".$geo_field])) {
-                    $specific_search = True;
-                    if ($args['params']["geolocation-".$geo_field]){
-                        $field_type = trim($args['params']["geolocation-".$geo_field]);
-                        $select->where($geo_field . ' LIKE "%' . $field_type . '%"');
+                if(isset($args['params']["geolocation-".$geo_field])) { //param in arguments?
+                    if($args['params']['geolocation-'.$geo_field]){ //param filled?
+                        $specific_search = True;
+                        if ($args['params']["geolocation-".$geo_field]){
+                            $field_type = trim($args['params']["geolocation-".$geo_field]);
+                            $select->where($geo_field . ' LIKE "%' . $field_type . '%"');
+                        }
                     }
                 }
             }
