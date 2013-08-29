@@ -50,6 +50,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                                 "planetary_body");
 
     public function hookInitialize(){
+        $key = get_option('geolocation_gmaps_key');// ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';
+        $lang = "nl";
+        queue_js_url("https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places&key=$key&language=$lang");
     }
 
     public function setUp(){
@@ -62,7 +65,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         
     public function hookAdminHead($args)
     {
-        $key = get_option('geolocation_gmaps_key') ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';
+        $key = get_option('geolocation_gmaps_key');// ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';
         $lang = "nl";
         $view = $args['view'];
         $view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
@@ -161,6 +164,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         set_option('geolocation_default_zoom_level', $_POST['default_zoomlevel']);
         set_option('geolocation_item_map_width', $_POST['item_map_width']);
         set_option('geolocation_item_map_height', $_POST['item_map_height']);
+        set_option('geolocation_gmaps_key', $_POST['geolocation_gmaps_key']);
         $perPage = (int)$_POST['per_page'];
         if ($perPage <= 0) {
             $perPage = GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE;
@@ -261,7 +265,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     }
     
     public function hookPublicHead($args){
-        $key = get_option('geolocation_gmaps_key') ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';
+        $key = get_option('geolocation_gmaps_key');// ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';
         $lang = "nl";
         $view = $args['view'];
         $view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
@@ -451,6 +455,45 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         return $navArray;        
     }
     
+    protected function _autocomplete_js_code(){
+        return "
+        <script type=\"text/javascript\">
+            if (google){
+                var options = {
+            	    types: []
+                };
+            	var input = document.getElementById('geolocation-address');
+            	var autocomplete = new google.maps.places.Autocomplete(input, options);
+
+                jQuery(document).ready(function() {
+            	    jQuery('#<?php echo $searchButtonId; ?>').click(function(event) {
+
+            	        // Find the geolocation for the address
+            	        var address = jQuery('#geolocation-address').val();
+                        if (jQuery.trim(address).length > 0) {
+                            var geocoder = new google.maps.Geocoder();	        
+                            geocoder.geocode({'address': address}, function(results, status) {
+                                // If the point was found, then put the marker on that spot
+                        		if (status == google.maps.GeocoderStatus.OK) {
+                        			var gLatLng = results[0].geometry.location;
+                        	        // Set the latitude and longitude hidden inputs
+                        	        jQuery('#geolocation-latitude').val(gLatLng.lat());
+                        	        jQuery('#geolocation-longitude').val(gLatLng.lng());
+                                    jQuery('#<?php echo $searchFormId; ?>').submit();
+                        		} else {
+                        		  	// If no point was found, give us an alert
+                        		    alert('Error: \"' + address + '\" was not found!');
+                        		}
+                            });
+
+                            event.stopImmediatePropagation();
+                	        return false;
+                        }                
+            	    });
+                });
+            };
+        </script>";
+    }
     
     /**
      * Returns the form code for geographically searching for items

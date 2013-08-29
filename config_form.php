@@ -49,6 +49,18 @@
 
 <div class="field">
     <div class="two columns alpha">
+        <label for="item_map_width">Google places / maps key</label>    
+    </div>    
+    <div class="inputs five columns omega">
+        <p class="explanation">A key for using the google places autocomplete functions.</p>
+        <div class="input-block">        
+            <input type="text" class="textinput"  name="geolocation_gmaps_key" size="8" value="<?php echo get_option('geolocation_gmaps_key'); ?>" id="geolocation_gmaps_key" />
+        </div>
+    </div>
+</div>
+
+<div class="field">
+    <div class="two columns alpha">
         <label for="item_map_width">Width for Item Map</label>    
     </div>    
     <div class="inputs five columns omega">

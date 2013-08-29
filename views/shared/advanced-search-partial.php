@@ -1,5 +1,4 @@
 <?php 
-
 $request = Zend_Controller_Front::getInstance()->getRequest();
 
 // Get the address, latitude, longitude, and the radius from parameters
@@ -22,7 +21,7 @@ if (empty($radius)) {
         </td>
         <td>
             <?php echo $this->formText('geolocation-address',  $address, array('name'=>'geolocation-address','size' => '40','id'=>'geolocation-address','class'=>'textinput', "style" => "margin-bottom:0")); ?>
-            <?php echo $this->formText('geolocation-latitude', $currentLat, array('name'=>'geolocation-latitude','id'=>'geolocation-latitude')); ?>
+            <?php echo $this->formHidden('geolocation-latitude', $currentLat, array('name'=>'geolocation-latitude','id'=>'geolocation-latitude')); ?>
             <?php echo $this->formHidden('geolocation-longitude', $currentLng, array('name'=>'geolocation-longitude','id'=>'geolocation-longitude')); ?>
             <?php #echo $this->formHidden('geolocation-radius', $radius, array('name'=>'geolocation-radius','id'=>'geolocation-radius')); ?>
         </td>
@@ -53,38 +52,39 @@ if (empty($radius)) {
     </table>
 </div>
 
-<!--<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script> CAUSES A BUNCH OF PROBLEMS-->
 <script type="text/javascript">
-    var options = {
-	    types: []
-    };
-	var input = document.getElementById('geolocation-address');
-	var autocomplete = new google.maps.places.Autocomplete(input, options);
+    if (google){
+        var options = {
+    	    types: []
+        };
+    	var input = document.getElementById('geolocation-address');
+    	var autocomplete = new google.maps.places.Autocomplete(input, options);
 
-    jQuery(document).ready(function() {
-	    jQuery('#<?php echo $searchButtonId; ?>').click(function(event) {
+        jQuery(document).ready(function() {
+    	    jQuery('#<?php echo $searchButtonId; ?>').click(function(event) {
 	            	        
-	        // Find the geolocation for the address
-	        var address = jQuery('#geolocation-address').val();
-            if (jQuery.trim(address).length > 0) {
-                var geocoder = new google.maps.Geocoder();	        
-                geocoder.geocode({'address': address}, function(results, status) {
-                    // If the point was found, then put the marker on that spot
-            		if (status == google.maps.GeocoderStatus.OK) {
-            			var gLatLng = results[0].geometry.location;
-            	        // Set the latitude and longitude hidden inputs
-            	        jQuery('#geolocation-latitude').val(gLatLng.lat());
-            	        jQuery('#geolocation-longitude').val(gLatLng.lng());
-                        jQuery('#<?php echo $searchFormId; ?>').submit();
-            		} else {
-            		  	// If no point was found, give us an alert
-            		    alert('Error: "' + address + '" was not found!');
-            		}
-                });
+    	        // Find the geolocation for the address
+    	        var address = jQuery('#geolocation-address').val();
+                if (jQuery.trim(address).length > 0) {
+                    var geocoder = new google.maps.Geocoder();	        
+                    geocoder.geocode({'address': address}, function(results, status) {
+                        // If the point was found, then put the marker on that spot
+                		if (status == google.maps.GeocoderStatus.OK) {
+                			var gLatLng = results[0].geometry.location;
+                	        // Set the latitude and longitude hidden inputs
+                	        jQuery('#geolocation-latitude').val(gLatLng.lat());
+                	        jQuery('#geolocation-longitude').val(gLatLng.lng());
+                            jQuery('#<?php echo $searchFormId; ?>').submit();
+                		} else {
+                		  	// If no point was found, give us an alert
+                		    alert('Error: "' + address + '" was not found!');
+                		}
+                    });
                 
-                event.stopImmediatePropagation();
-    	        return false;
-            }                
-	    });
-    });
+                    event.stopImmediatePropagation();
+        	        return false;
+                }                
+    	    });
+        });
+    };
 </script>
