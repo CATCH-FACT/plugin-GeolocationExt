@@ -65,8 +65,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         
     public function hookAdminHead($args)
     {
-        $key = get_option('geolocation_gmaps_key');// ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';
-        $lang = "nl";
+#        $key = get_option('geolocation_gmaps_key');// ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';
+#        $lang = "nl";
         $view = $args['view'];
         $view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
         $request = Zend_Controller_Front::getInstance()->getRequest();
@@ -82,7 +82,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             queue_css_file('geolocation-items-map');
             queue_css_file('geolocation-marker');
 #            queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
-            queue_js_url("https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places&key=$key&language=$lang");
+#            queue_js_url("https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places&key=$key&language=$lang");
             queue_js_file('map');
         }
     }
@@ -265,8 +265,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     }
     
     public function hookPublicHead($args){
-        $key = get_option('geolocation_gmaps_key');// ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';
-        $lang = "nl";
+#        $key = get_option('geolocation_gmaps_key');// ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';
+#        $lang = "nl";
         $view = $args['view'];
         $view->addHelperPath(GEOLOCATION_PLUGIN_DIR . '/helpers', 'Geolocation_View_Helper_');
         $request = Zend_Controller_Front::getInstance()->getRequest();
@@ -282,7 +282,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             queue_css_file('geolocation-items-map');
             queue_css_file('geolocation-marker');
 #            queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
-            queue_js_url("https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places&key=$key&language=$lang");
+#            queue_js_url("https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places&key=$key&language=$lang");
             queue_js_file('map');
         }        
     }
