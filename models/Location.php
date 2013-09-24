@@ -4,7 +4,7 @@
  * Location
  * @package: Omeka
  */
-class Location extends Omeka_Record_AbstractRecord
+class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_Interface
 {
     public $item_id;
     public $latitude;
@@ -34,8 +34,12 @@ class Location extends Omeka_Record_AbstractRecord
     protected function _validate()
     {
         if (empty($this->item_id)) {
-            $this->addError('item_id', 'Location requires an item id.');
+            $this->addError('item_id', 'Location requires an item ID.');
         }
+/*        // An item must exist.
+        if (!$this->getTable('Item')->exists($this->item_id)) {
+            $this->addError('item_id', __('Location requires a valid item ID.'));
+        }*/
     }
     
     public function get_locationdata_for_public_viewing(){
@@ -57,5 +61,42 @@ class Location extends Omeka_Record_AbstractRecord
                             "planetary_body" => $this->planetary_body,
                             );
         return $view_items;
+    }
+    
+    public function get_locationdata_for_api(){
+        $view_items = array("item_id" => $this->item_id, 
+                            "latitude" => $this->latitude,
+                            "longitude" => $this->longitude,
+                            "zoom_level" => $this->zoom_level,
+                            "map_type" => $this->map_type,
+                            "address" => $this->address,
+                            "point_of_interest" => $this->point_of_interest, 
+                            "route" => $this->route,
+                            "street_number" => $this->street_number,
+                            "postal_code" => $this->postal_code,
+                            "postal_code_prefix" => $this->postal_code_prefix,
+                            "sublocality" => $this->sublocality,
+                            "locality" => $this->locality,
+                            "natural_feature" => $this->natural_feature,
+                            "establishment" => $this->establishment,
+                            "point_of_interest" => $this->point_of_interest,
+                            "administrative_area_level_3" => $this->administrative_area_level_3,
+                            "administrative_area_level_2" => $this->administrative_area_level_2,
+                            "administrative_area_level_1" => $this->administrative_area_level_1,
+                            "country" => $this->country,
+                            "continent" => $this->continent,
+                            "planetary_body" => $this->planetary_body,
+                            );
+        return $view_items;
+    }
+    
+    /**
+     * Identify Location records as relating to the Locations ACL resource.
+     * 
+     * @return string
+     */
+    public function getResourceId()
+    {
+        return 'Locations';
     }
 }

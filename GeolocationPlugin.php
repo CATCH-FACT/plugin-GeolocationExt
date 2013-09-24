@@ -30,7 +30,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'response_contexts',
             'action_contexts',
             'admin_items_form_tabs',
-            'public_navigation_items'            
+            'public_navigation_items',
+            'api_resources',
+            'api_extend_items',
             );
     
     public $_all_geo_fields = array("point_of_interest",
@@ -53,6 +55,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $key = get_option('geolocation_gmaps_key');// ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';
         $lang = "nl";
         queue_js_url("https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places&key=$key&language=$lang");
+        add_translation_source(dirname(__FILE__) . '/languages');
     }
 
     public function setUp(){
@@ -182,6 +185,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {   
         $acl = $args['acl'];
         $acl->allow(null, 'Items', 'modifyPerPage');
+        $acl->addResource('Locations');
+        $acl->allow(null, 'Locations');
     }
     
     public function hookDefineRoutes($args)
@@ -648,5 +653,52 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 'longitude'=> (double) get_option('geolocation_default_longitude'),
                 'zoomLevel'=> (double) get_option('geolocation_default_zoom_level'));        
         
-    }    
+    }
+    
+    /**
+     * Register the geolocations API resource.
+     * 
+     * @param array $apiResources
+     * @return array
+     */
+    public function filterApiResources($apiResources)
+    {
+        $apiResources['geolocations'] = array(
+            'record_type' => 'Location',
+            'actions' => array('get', 'index', 'post', 'put', 'delete'), 
+        );
+        return $apiResources;
+    }
+    
+    /**
+     * Add geolocations to item API representations.
+     * 
+     * @param array $extend
+     * @param array $args
+     * @return array
+     */
+    public function filterApiExtendItems($extend, $args)
+    {
+        $item = $args['record'];
+        $location[] = $this->_db->getTable('Location')->findLocationByItem($item, true);
+        if (!$location) {
+            return $extend;
+        }
+        $locationId = $location[0]['id'];
+#        print_r($locationId);
+#        print Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl("/geolocations/$locationId");
+        $extend['geolocations'] = array(
+            'id' => "1", 
+            'url' => "bla", 
+            'resource' => 'geolocations',
+        );
+/*
+        $extend['geolocations'] = array(
+            'id' => $locationId, 
+            'url' => Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl("/geolocations/$locationId"), 
+            'resource' => 'geolocations',
+        );*/
+        return $extend;
+    }
+    
 }

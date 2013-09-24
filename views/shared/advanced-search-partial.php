@@ -43,7 +43,7 @@ if (empty($radius)) {
         <?php $search_value = trim($request->getParam($geo_field)); 
         $geo_field = trim($geo_field)?>
         <tr>
-        <td><div><?php echo $geo_field;?></div></td>
+        <td><div><?php echo __($geo_field);?></div></td>
         <td>
             <?php echo $this->formText("geolocation-".$geo_field, $search_value, array('name' => "geolocation-".$geo_field, 'size' => '40', 'id' => "geolocation-".$geo_field, 'class'=>'textinput', "style" => "margin-bottom:0"));?>
         </td>
