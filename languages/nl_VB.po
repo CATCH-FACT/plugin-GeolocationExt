@@ -1,0 +1,201 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Geolocation\n"
+"Report-Msgid-Bugs-To: http://github.com/iwemuiser/plugin-GeolocationExt/"
+"issues\n"
+"POT-Creation-Date: 2013-04-12 21:49-0500\n"
+"PO-Revision-Date: 2013-09-24 19:11+0100\n"
+"Last-Translator: Iwe EC Muiser <e.c.muiser@utwente.nl>\n"
+"Language-Team: Dutch (http://www.transifex.net/projects/p/omeka/team/nl/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: nl_NL\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\\\\n;\n"
+"X-Generator: Poedit 1.5.7\n"
+
+#: config_form.php:3
+msgid "Number of Locations Per Page"
+msgstr "Hoeveelheid locaties per pagina"
+
+#: config_form.php:6
+msgid ""
+"The number of locations displayed per page when browsing the map. (Maximum "
+"is "
+msgstr ""
+"Het aantal locaties dat per pagina mag worden weergegeven wanneer gebladerd "
+"wordt met de kaart. (Maximum is "
+
+#: config_form.php:16
+msgid "Default Latitude"
+msgstr "Standaard Latitude"
+
+#: config_form.php:19
+msgid ""
+"Latitude of the map's initial center point, in degrees. Must be between -90 "
+"and 90."
+msgstr ""
+"Latitude van het initiële punt van de kaart moet, in graden, tussen de -90 "
+"en 90 zijn."
+
+#: config_form.php:28
+msgid "Default Longitude"
+msgstr "Standaard Longitude"
+
+#: config_form.php:31
+msgid ""
+"Longitude of the map's initial center point, in degrees. Must be between "
+"-180 and 180."
+msgstr ""
+"Longitude van het initiële punt van de kaart moet, in graden, tussen de -180 "
+"en 180 zijn. "
+
+#: config_form.php:40
+msgid "Default Zoom Level"
+msgstr "Standaard Zoom Niveau"
+
+#: config_form.php:43
+msgid ""
+"An integer greater than or equal to 0, where 0 represents the most zoomed "
+"out scale."
+msgstr ""
+"Een integer groter dan, of gelijk aan 0, waar 0 de meest uitgezoomde staat "
+"representeert."
+
+#: config_form.php:52
+msgid "Width for Item Map"
+msgstr "Breedte voor de Item kaart"
+
+#: config_form.php:55
+msgid ""
+"The width of the map displayed on your items/show page. If left blank, the "
+"default width of 100% will be used."
+msgstr ""
+"De breedte van de map die wordt weergegeven op de items/show pagina. Als "
+"niks wordt ingevuld zal 100% worden aangenomen."
+
+#: config_form.php:64
+msgid "Height for Item Map"
+msgstr "Hoogte voor de Item kaart"
+
+#: config_form.php:67
+msgid ""
+"The height of the map displayed on your items/show page. If left blank, the "
+"default height of 300px will be used."
+msgstr ""
+"Hoogte van de kaart die wordt weggegeven op de items/show pagina. 300px "
+"wordt aangehouden wanneer niks ingevuld wordt."
+
+#: config_form.php:76
+msgid "Use metric distances"
+msgstr "Gebruik metrische afstanden"
+
+#: config_form.php:79
+msgid "Use metric distances in proximity search."
+msgstr "Gebruik metrische afstanden voor zoeken in omgeving."
+
+#: config_form.php:89
+msgid "Add Link to Map on Items/Browse Navigation"
+msgstr "Voeg een link toe aan de kaart op de Items/Browse navigatie"
+
+#: config_form.php:92
+msgid "Add a link to the items map on all the items/browse pages."
+msgstr "Voeg een link toe aan de items kaart op al de items/blader pagina's."
+
+#: config_form.php:103
+msgid "Add Map To Contribution Form"
+msgstr "Voeg een kaart toe op het contributieformulier"
+
+#: config_form.php:106
+msgid ""
+"If the Contribution plugin is installed and activated, Geolocation  will add "
+"a geolocation map field to the contribution form to associate a location to "
+"a contributed item."
+msgstr ""
+"Als de Contributie plugin geïnstalleerd en geactiveerd is kan een locatie "
+"worden toegevoegd aan iedere contributie. Een extra optie verschijnt op het "
+"Contributieformulier."
+
+#: GeolocationPlugin.php:330 GeolocationPlugin.php:336
+msgid "Map"
+msgstr "Kaart"
+
+#: GeolocationPlugin.php:369 views/public/map/browse.php:23
+msgid "Browse Map"
+msgstr "Blader kaart"
+
+#: GeolocationPlugin.php:379
+msgid "Find A Geographic Location For The "
+msgstr "Vind een geografische locatie voor de "
+
+#: GeolocationPlugin.php:397
+msgid "Find a Location by Address:"
+msgstr "Vind een locatie per adres:"
+
+#: GeolocationPlugin.php:435
+msgid "Find"
+msgstr "Vind"
+
+#: helpers/ItemGoogleMap.php:47
+msgid "This item has no location info associated with it."
+msgstr "Dit item heeft geen toegewezen locatie."
+
+#: models/Location.php:19
+msgid "Location requires an item id."
+msgstr "Locatie heeft een Item id nodig."
+
+#: views/admin/map/browse.php:39 views/public/map/browse.php:43
+msgid "Find An Item on the Map"
+msgstr "Vind een item op de kaart"
+
+#: views/public/map/browse.php:26
+msgid "Browse Items on the Map"
+msgstr "Blader Items op de kaart"
+
+#: views/public/map/browse.php:26
+msgid "total"
+msgstr "totaal"
+
+#: GeolocationPlugin.php:450
+msgid "Results on map"
+msgstr "Resultaten op kaart"
+
+#: views/shared/advanced-search-partial.php:19
+msgid "Geographic Address"
+msgstr "Geografisch adres"
+
+#: views/shared/advanced-search-partial.php:29
+msgid "Geographic Radius (miles)"
+msgstr "Geografische radius (mijl)"
+
+#: views/shared/advanced-search-partial.php:29
+msgid "Geographic Radius (km)"
+msgstr "Geografische radius (kilometers)"
+
+#: views/public/map/GeolocationPlugin.php:305
+msgid "Place of narration"
+msgstr "Plaats van vertellen"
+
+#: views/shared/advanced-search-partial.php:46
+msgid "route"
+msgstr "Straat"
+
+#: views/shared/advanced-search-partial.php:46
+msgid "sublocality"
+msgstr "Stadsdeel"
+
+#: views/shared/advanced-search-partial.php:46
+msgid "locality"
+msgstr "Plaats"
+
+#: views/shared/advanced-search-partial.php:46
+msgid "administrative_area_level_2"
+msgstr "Gemeente(NL)/Provincie(Be)"
+
+#: views/shared/advanced-search-partial.php:46
+msgid "administrative_area_level_1"
+msgstr "Provincie(NL)/Gewest(BE)"
+
+#: views/shared/advanced-search-partial.php:46
+msgid "country"
+msgstr "Land"
