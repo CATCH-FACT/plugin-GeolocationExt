@@ -13,11 +13,12 @@ if (empty($radius)) {
 ?>
 
 <div class="field">
+    <div class="label"><?php echo __('Geographic Address'); ?></div>
     <center>
     <table width=90%>
     <tr>
         <td><div>
-            <?php echo __('Geographic Address') . " (Plaats van vertellen)"; ?></div>
+            <?php echo __('Geographic Address') . " (" . __("Place of narration") . ")"; ?></div>
         </td>
         <td>
             <?php echo $this->formText('geolocation-address',  $address, array('name'=>'geolocation-address','size' => '40','id'=>'geolocation-address','class'=>'textinput', "style" => "margin-bottom:0")); ?>
