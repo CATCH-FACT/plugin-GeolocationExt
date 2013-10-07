@@ -349,7 +349,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $geo_field = trim($geo_field);
             if(isset($args['params']['geolocation-'.$geo_field])) {
                 $search_value = trim($args['params']['geolocation-'.$geo_field]);
-                if ( (isset($args['params']['only_map_items']) && $args['params']['only_map_items']) && $search_value != ''){
+                if ( $search_value != ''){
                     //fire only once
                     if ($specific_geo_search == False){
                         $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array('latitude', 'longitude', 'address')); 
@@ -395,65 +395,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array());
         }
     }
-    
-    public function hookItemsBrowseSqlOLD($args)
-        {
-            $db = $this->_db;
-            $select = $args['select'];
-            $alias = $this->_db->getTable('Location')->getTableAlias();
-            $specific_search = False;
-            foreach($this->_all_geo_fields as $geo_field){
-                if(isset($args['params']["geolocation-".$geo_field])) { //param in arguments?
-                    if($args['params']['geolocation-'.$geo_field]){ //param filled?
-                        $specific_search = True;
-                        if ($args['params']["geolocation-".$geo_field]){
-                            $field_type = trim($args['params']["geolocation-".$geo_field]);
-                            $select->where($geo_field . ' LIKE "%' . $field_type . '%"');
-                        }
-                    }
-                }
-            }
-            if ($specific_search){
-#                print "SPECIFIC SEARCH";
-                $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array());
-                //ORDER by the closest distances
-                $select->order('locality');
-            }
-            //else
-            else if(isset($args['params']['geolocation-address'])) {
-                if($args['params']['geolocation-address']){
-                    // Get the address, latitude, longitude, and the radius from parameters
-                    $address = trim($args['params']['geolocation-address']);
-                    $currentLat = trim($args['params']['geolocation-latitude']);
-                    $currentLng = trim($args['params']['geolocation-longitude']);
-                    $radius = trim($args['params']['geolocation-radius']);
-
-                    if ( (isset($args['params']['only_map_items']) && $args['params']['only_map_items'] ) || $address != '') {
-                        //INNER JOIN the locations table
-                        $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array('latitude', 'longitude', 'address'));                    
-                    }
-                    // Limit items to those that exist within a geographic radius if an address and radius are provided
-                    if ($address != '' && is_numeric($currentLat) && is_numeric($currentLng) && is_numeric($radius)) {
-                        // SELECT distance based upon haversine forumula
-                        $select->columns('3956 * 2 * ASIN(SQRT(  POWER(SIN(('.$currentLat.' - locations.latitude) * pi()/180 / 2), 2) + COS('.$currentLat.' * pi()/180) *  COS(locations.latitude * pi()/180) *  POWER(SIN(('.$currentLng.' -locations.longitude) * pi()/180 / 2), 2)  )) as distance');
-                        // WHERE the distance is within radius miles/kilometers of the specified lat & long
-                        if (get_option('geolocation_use_metric_distances')) {
-                            $denominator = 111;
-                        } else {
-                            $denominator = 69;
-                        }
-
-                        $select->where('(latitude BETWEEN '.$currentLat.' - ' . $radius . '/'.$denominator.' AND ' . $currentLat . ' + ' . $radius .  '/'.$denominator.')
-                     AND (longitude BETWEEN ' . $currentLng . ' - ' . $radius . '/'.$denominator.' AND ' . $currentLng  . ' + ' . $radius .  '/'.$denominator.')');
-                        //ORDER by the closest distances
-                        $select->order('distance');
-                    }
-                }
-            } else if( isset($args['params']['only_map_items']) AND !$specific_search) {
-                $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array());
-            }
-            _log("GEOLOCATION PLUGIN SELECT STATEMENT:\n" . $select);
-        }
     
     public function filterAdminNavigationMain($navArray)
     {
