@@ -41,8 +41,9 @@ if (empty($radius)) {
     </tr>
     <?php
     foreach(explode("\n", get_option("geolocation_public_search_fields")) as $geo_field):?>
-        <?php $search_value = trim($request->getParam($geo_field)); 
-        $geo_field = trim($geo_field)?>
+        <?php 
+        $geo_field = trim($geo_field);
+        $search_value = trim($request->getParam("geolocation-".$geo_field));?>
         <tr>
         <td><div><?php echo __($geo_field);?></div></td>
         <td>
