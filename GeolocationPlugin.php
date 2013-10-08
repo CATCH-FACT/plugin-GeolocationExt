@@ -33,6 +33,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'public_navigation_items',
             'api_resources',
             'api_extend_items',
+            'search_record_types'
             );
     
     public $_all_geo_fields = array("point_of_interest",
@@ -65,7 +66,16 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }
         parent::setUp();
     }
-        
+    
+    /**
+     * Add SimplePagesPage as a searchable type.
+     */
+    public function filterSearchRecordTypes($recordTypes)
+    {
+        $recordTypes['Location'] = __('Locations');
+        return $recordTypes;
+    }
+    
     public function hookAdminHead($args)
     {
 #        $key = get_option('geolocation_gmaps_key');// ? get_option('geolocation_gmaps_key') : 'AIzaSyD6zj4P4YxltcYJZsRVUvTqG_bT1nny30o';

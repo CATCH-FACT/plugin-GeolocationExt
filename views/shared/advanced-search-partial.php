@@ -21,8 +21,9 @@ if (empty($radius)) {
             <?php echo __('Geographic Address') . " (" . __("Place of narration") . ")"; ?></div>
         </td>
         <td>
+            <?php echo $this->formText('geolocation-latitude', $currentLat, array('name'=>'geolocation-latitude','id'=>'geolocation-latitude','class'=>'textinput', "style" => "margin-bottom:0")); ?>
             <?php echo $this->formText('geolocation-address',  $address, array('name'=>'geolocation-address','size' => '40','id'=>'geolocation-address','class'=>'textinput', "style" => "margin-bottom:0")); ?>
-            <?php echo $this->formHidden('geolocation-latitude', $currentLat, array('name'=>'geolocation-latitude','id'=>'geolocation-latitude')); ?>
+            <?php # echo $this->formHidden('geolocation-latitude', $currentLat, array('name'=>'geolocation-latitude','id'=>'geolocation-latitude')); ?>
             <?php echo $this->formHidden('geolocation-longitude', $currentLng, array('name'=>'geolocation-longitude','id'=>'geolocation-longitude')); ?>
             <?php #echo $this->formHidden('geolocation-radius', $radius, array('name'=>'geolocation-radius','id'=>'geolocation-radius')); ?>
         </td>
@@ -61,10 +62,9 @@ if (empty($radius)) {
         };
     	var input = document.getElementById('geolocation-address');
     	var autocomplete = new google.maps.places.Autocomplete(input, options);
-
         jQuery(document).ready(function() {
-    	    jQuery('#<?php echo $searchButtonId; ?>').click(function(event) {
-	            	        
+//    	    jQuery('#<?php echo $searchButtonId; ?>').click(function(event) {
+    	    jQuery('.submit').click(function(event) {
     	        // Find the geolocation for the address
     	        var address = jQuery('#geolocation-address').val();
                 if (jQuery.trim(address).length > 0) {
@@ -75,6 +75,7 @@ if (empty($radius)) {
                 			var gLatLng = results[0].geometry.location;
                 	        // Set the latitude and longitude hidden inputs
                 	        jQuery('#geolocation-latitude').val(gLatLng.lat());
+//                	        jQuery('#geolocation-latitude').val(gLatLng.lat());
                 	        jQuery('#geolocation-longitude').val(gLatLng.lng());
                             jQuery('#<?php echo $searchFormId; ?>').submit();
                 		} else {
