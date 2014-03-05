@@ -1,7 +1,7 @@
 <?php
 
 define('GOOGLE_MAPS_API_VERSION', '3.x');
-define('GEOLOCATION_MAX_LOCATIONS_PER_PAGE', 1000);
+define('GEOLOCATION_MAX_LOCATIONS_PER_PAGE', 20000);
 define('GEOLOCATION_DEFAULT_LOCATIONS_PER_PAGE', 50);
 define('GEOLOCATION_PLUGIN_DIR', PLUGIN_DIR . '/Geolocation');
 
@@ -22,7 +22,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'public_items_search',
             'items_browse_sql',
             'public_head',
-            'admin_head'
+            'admin_head',
+            'contribution_type_form',
+            'contribution_save_form'
             );
     
     protected $_filters = array(
@@ -60,10 +62,10 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     }
 
     public function setUp(){
-        if(plugin_is_active('Contribution')) {
+#        if(plugin_is_active('Contribution')) {
 #            $this->_hooks[] = 'contribution_append_to_type_form';
 #            $this->_hooks[] = 'contribution_save_form';
-        }
+#        }
         parent::setUp();
     }
     
@@ -222,17 +224,19 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     
     public function hookAfterSaveItem($args)
     {
-        $post = $args['post'];
-        $item = $args['record'];   
+        if (!($post = $args['post'])) {
+            return;
+        }
 
+        $item = $args['item'];
         // If we don't have the geolocation form on the page, don't do anything!
         if (!$post['geolocation']) {
             return;
         }
-        
+
         // Find the location object for the item
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
-        
+
         // If we have filled out info for the geolocation, then submit to the db
         $geolocationPost = $post['geolocation'];
         if (!empty($geolocationPost) &&
@@ -524,6 +528,23 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         </script>";
     }
     
+    public function hookContributionTypeForm($args)
+    {
+       $contributionType = $args['type'];
+       echo $this->_mapForm(null, 
+                            __('Find A Geographic Location For The ') . $contributionType->display_name . ':', 
+                            false, 
+                            null, 
+                            true);
+#        echo $this->_mapForm(null, __('Find A Geographic Location For The ') . $contributionType->display_name . ':', false );
+    }
+
+    public function hookContributionSaveForm($args)
+    {
+        _log($args['item']->id);
+        $this->hookAfterSaveItem($args);
+    }
+
     /**
      * Returns the form code for geographically searching for items
      * @param Item $item
@@ -531,8 +552,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
      * @param int $height
      * @return string
      **/    
-    protected function _mapForm($item, $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null)
+    protected function _mapForm($item, $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null, $input_fields_hide = false)
     {
+        $input_type = ($input_fields_hide ? ' style="display:none;"' : '');
         $html = '';
         
         $center = $this->_getCenter();
@@ -589,7 +611,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             }
         }
         
-        $html .= '<div class="field">';
+        $html .= '<div class="field" >';
         $html .=     '<div id="location_form" class="two columns alpha">';
         $html .=         '<label>' . html_escape($label) . '</label>';
         $html .=     '</div>';
@@ -603,7 +625,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $html .= '<div  id="omeka-map-form" style="width: 100%; height: 300px"></div>';
         
         #site for auto filled geo location information:
-        $html .=      '<div class="input-block">';
+        $html .=      '<div class="input-block" ' . $input_type . '>';
         $html .=         '<label>' . html_escape("Latitude") . '</label>';
         $html .=         '<input name="geolocation[latitude]" value="' . $lat . '" class="coordinput"/>';
         $html .=         '<label>' . html_escape("Longitude") . '</label>';
@@ -613,7 +635,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $html .=         '<input type="hidden" name="geolocation[map_type]" value="Google Maps v' . GOOGLE_MAPS_API_VERSION . '" /><br>';
         $html .=     '</div>';
 
-        $html .= '<div class="field">';
+        $html .= '<div class="field" ' . $input_type . '>';
         $html .=     '<div id="location_form" class="two columns alpha">';
         $html .=         '<label>Address</label>';
         $html .=         '<label>Streetnumber</label>';
@@ -647,11 +669,11 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $html .= '</div>';
         $options = array();
         $options['form'] = array('id' => 'location_form',
-                'posted' => $usePost);
+                                'posted' => $usePost);
         if ($location or $usePost) {
             $options['point'] = array('latitude' => $lat,
-                    'longitude' => $lng,
-                    'zoomLevel' => $zoom);
+                                        'longitude' => $lng,
+                                        'zoomLevel' => $zoom);
         }
         
         $options['confirmLocationChange'] = $confirmLocationChange;
@@ -676,7 +698,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 'latitude'=>  (double) get_option('geolocation_default_latitude'),
                 'longitude'=> (double) get_option('geolocation_default_longitude'),
                 'zoomLevel'=> (double) get_option('geolocation_default_zoom_level'));        
-        
     }
     
     /**
@@ -696,7 +717,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     
     /**
      * Add geolocations to item API representations.
-     * 
+     *
      * @param array $extend
      * @param array $args
      * @return array
@@ -704,25 +725,18 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function filterApiExtendItems($extend, $args)
     {
         $item = $args['record'];
-        $location[] = $this->_db->getTable('Location')->findLocationByItem($item, true);
+        $location = $this->_db->getTable('Location')->findBy(array('item_id' => $item->id));
         if (!$location) {
             return $extend;
         }
         $locationId = $location[0]['id'];
-#        print_r($locationId);
-#        print Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl("/geolocations/$locationId");
         $extend['geolocations'] = array(
-            'id' => "1", 
-            'url' => "bla", 
+            'id' => $locationId,
+            'url' => Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl("/geolocations/{$locationId}"),
             'resource' => 'geolocations',
         );
-/*
-        $extend['geolocations'] = array(
-            'id' => $locationId, 
-            'url' => Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl("/geolocations/$locationId"), 
-            'resource' => 'geolocations',
-        );*/
+        print_r($extend);
+        print "*************************************************<BR>";
         return $extend;
     }
-    
 }
