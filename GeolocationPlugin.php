@@ -228,7 +228,11 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             return;
         }
 
-        $item = $args['item'];
+        $item = $args['record'];
+        if (!$item) {
+            $item = $args['item'];
+        }
+        
         // If we don't have the geolocation form on the page, don't do anything!
         if (!$post['geolocation']) {
             return;
@@ -735,8 +739,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'url' => Omeka_Record_Api_AbstractRecordAdapter::getResourceUrl("/geolocations/{$locationId}"),
             'resource' => 'geolocations',
         );
-        print_r($extend);
-        print "*************************************************<BR>";
         return $extend;
     }
 }

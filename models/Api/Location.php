@@ -19,7 +19,6 @@ class Api_Location extends Omeka_Record_Api_AbstractRecordAdapter
      */
     public function getRepresentation(Omeka_Record_AbstractRecord $record)
     {
-        _log("representation got!");
         $representation = array(
             'id' => $record->id, 
             'url' => $this->getResourceUrl("/geolocations/{$record->id}"), 
