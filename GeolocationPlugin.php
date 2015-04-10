@@ -24,7 +24,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'public_head',
             'admin_head',
             'contribution_type_form',
-            'contribution_save_form'
+            'contribution_save_form',
+            'annotation_type_form',
+            'annotation_save_form',
             );
     
     protected $_filters = array(
@@ -89,15 +91,11 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $controller = $request->getControllerName();
         $action = $request->getActionName();        
         if ( ($module == 'geolocation' && $controller == 'map')
-                    || ($module == 'contribution' 
-                        && $controller == 'contribution' 
-                        && $action == 'contribute' 
-                        && get_option('geolocation_add_map_to_contribution_form') == '1')
-                     || ($controller == 'items') )  {
+                    || ($module == 'contribution' && $controller == 'contribution' && $action == 'contribute' && get_option('geolocation_add_map_to_contribution_form') == '1')
+                    || ($module == 'annotation' && $controller == 'annotation' && $action == 'add') //hooray!
+                    || ($controller == 'items') )  {
             queue_css_file('geolocation-items-map');
             queue_css_file('geolocation-marker');
-#            queue_js_url("http://maps.google.com/maps/api/js?sensor=false");
-#            queue_js_url("https://maps.googleapis.com/maps/api/js?sensor=false&libraries=places&key=$key&language=$lang");
             queue_js_file('map');
         }
     }
@@ -531,6 +529,22 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             };
         </script>";
     }
+
+    public function hookAnnotationTypeForm($args)
+    {
+       $annotationType = $args['type'];
+       echo $this->_mapForm(null,
+                            __('Find A Geographic Location For The ') . $annotationType->display_name . ':', 
+                            false, 
+                            null, 
+                            true);
+    }
+
+    public function hookAnnotationSaveForm($args)
+    {
+        _log($args['item']->id);
+        $this->hookAfterSaveItem($args);
+    }
     
     public function hookContributionTypeForm($args)
     {
@@ -540,7 +554,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                             false, 
                             null, 
                             true);
-#        echo $this->_mapForm(null, __('Find A Geographic Location For The ') . $contributionType->display_name . ':', false );
     }
 
     public function hookContributionSaveForm($args)

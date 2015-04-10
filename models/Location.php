@@ -70,7 +70,6 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
                             "zoom_level" => $this->zoom_level,
                             "map_type" => $this->map_type,
                             "address" => $this->address,
-                            "point_of_interest" => $this->point_of_interest, 
                             "route" => $this->route,
                             "street_number" => $this->street_number,
                             "postal_code" => $this->postal_code,
