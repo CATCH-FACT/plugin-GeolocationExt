@@ -92,7 +92,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $action = $request->getActionName();        
         if ( ($module == 'geolocation' && $controller == 'map')
                     || ($module == 'contribution' && $controller == 'contribution' && $action == 'contribute' && get_option('geolocation_add_map_to_contribution_form') == '1')
-                    || ($module == 'annotation' && $controller == 'annotation' && $action == 'add') //hooray!
+                    || ($module == 'annotation' && $controller == 'annotation') //hooray!
                     || ($controller == 'items') )  {
             queue_css_file('geolocation-items-map');
             queue_css_file('geolocation-marker');
@@ -532,12 +532,14 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     public function hookAnnotationTypeForm($args)
     {
-       $annotationType = $args['type'];
-       echo $this->_mapForm(null,
+        
+        $annotationType = $args['type'];
+        $item = $args['item'];
+        echo $this->_mapForm($item,
                             __('Find A Geographic Location For The ') . $annotationType->display_name . ':', 
                             false, 
                             null, 
-                            true);
+                            false);
     }
 
     public function hookAnnotationSaveForm($args)
@@ -578,7 +580,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $center['show'] = false;
         
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
-                
+        
         if ($post === null) {
             $post = $_POST;
         }
@@ -653,36 +655,36 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $html .=     '</div>';
 
         $html .= '<div class="field" ' . $input_type . '>';
-        $html .=     '<div id="location_form" class="two columns alpha">';
-        $html .=         '<label>Address</label>';
-        $html .=         '<label>Streetnumber</label>';
-    	$html .=         '<label>Postal code</label>';
-    	$html .=         '<label>Postal code prefix</label>';
-    	$html .=         '<label>Sublocality</label>';
-    	$html .=         '<label>Place</label>';
-    	$html .=         '<label>Natural feature</label>';
-    	$html .=         '<label>Establishment</label>';
-    	$html .=         '<label>County (adm2)</label>';
-    	$html .=         '<label>Province (adm1)</label>';
-    	$html .=         '<label>Country</label>';
-    	$html .=         '<label>Planetary body</label>';
-        $html .=     '</div>';
-        $html .=     '<div class="inputs five columns omega">';
-        $html .=       '<div class="input-block">';
-        $html .=         '<input type="text" name="geolocation[route]" id="route" rows="1" size="20" value="'.$route.'" class="geotextinput"/>';
-        $html .=         '<input type="text" name="geolocation[street_number]" id="street_number" rows="1" size="4" value="'.$street_number.'" class="geotextinput"/><br>';
-    	$html .=         '<input type="text" name="geolocation[postal_code]" id="postal_code" rows="1" size="12" value="'.$postal_code.'" class="geotextinput"/>';
-    	$html .=         '<input type="text" name="geolocation[postal_code_prefix]" id="postal_code_prefix" rows="1" size="12" value="'.$postal_code_prefix.'" class="geotextinput"/><br>';
-        $html .=         '<input type="text" name="geolocation[sublocality]" id="sublocality" rows="1" size="28" value="'.$sublocality.'" class="geotextinput"/><br>';
-        $html .=         '<input type="text" name="geolocation[locality]" id="locality" rows="1" size="28" value="'.$locality.'" class="geotextinput"/><br>';
-        $html .=         '<input type="text" name="geolocation[natural_feature]" id="natural_feature" rows="1" size="28" value="'.$natural_feature.'" class="geotextinput"/><br>';
-        $html .=         '<input type="text" name="geolocation[establishment]" id="establishment" rows="1" size="28" value="'.$establishment.'" class="geotextinput"/><br>';
-        $html .=         '<input type="text" name="geolocation[administrative_area_level_2]" id="administrative_area_level_2" rows="1" size="28" value="'.$administrative_area_level_2.'" class="geotextinput"/><br>';
-        $html .=         '<input type="text" name="geolocation[administrative_area_level_1]" id="administrative_area_level_1" rows="1" size="28" value="'.$administrative_area_level_1.'" class="geotextinput"/><br>';
-        $html .=         '<input type="text" name="geolocation[country]" id="country" rows="1" size="28" value="'.$country.'" class="geotextinput"/><br>';
-        $html .=         '<input type="text" name="geolocation[planetary_body]" id="planetary_body" size="28" value="'.$planetary_body.'" class="geotextinput"/><br>';
-        $html .=       '</div>';
-        $html .=    '</div>';
+        $html .=     '<table id="location_form" class="geo" style="float:left;">';
+        $html .=         '<tr><td>Address</td>';
+        $html .=         '<td><input type="text" name="geolocation[route]" id="route" rows="1" size="20" value="'.$route.'" class="geotextinput"/></td></tr>';
+        $html .=         '<tr><td>Streetnumber</td>';
+        $html .=         '<td><input type="text" name="geolocation[street_number]" id="street_number" rows="1" size="4" value="'.$street_number.'" class="geotextinput"/></td></tr>';
+    	$html .=         '<tr><td>Postal code</td>';
+    	$html .=         '<td><input type="text" name="geolocation[postal_code]" id="postal_code" rows="1" size="12" value="'.$postal_code.'" class="geotextinput"/></td></tr>';
+    	$html .=         '<tr><td>Postal code prefix</td>';
+    	$html .=         '<td><input type="text" name="geolocation[postal_code_prefix]" id="postal_code_prefix" rows="1" size="12" value="'.$postal_code_prefix.'" class="geotextinput"/></td></tr>';
+    	$html .=         '<tr><td>Sublocality</td>';
+        $html .=         '<td><input type="text" name="geolocation[sublocality]" id="sublocality" rows="1" size="28" value="'.$sublocality.'" class="geotextinput"/></td></tr>';
+    	$html .=         '<tr><td>Place</td>';
+        $html .=         '<td><input type="text" name="geolocation[locality]" id="locality" rows="1" size="28" value="'.$locality.'" class="geotextinput"/></td></tr>';
+    	$html .=         '<tr><td>Natural feature</td>';
+        $html .=         '<td><input type="text" name="geolocation[natural_feature]" id="natural_feature" rows="1" size="28" value="'.$natural_feature.'" class="geotextinput"/></td></tr>';
+    	$html .=         '<tr><td>Establishment</td>';
+        $html .=         '<td><input type="text" name="geolocation[establishment]" id="establishment" rows="1" size="28" value="'.$establishment.'" class="geotextinput"/></td></tr>';	
+    	$html .=         '<tr><td>County (adm2)</td>';
+        $html .=         '<td><input type="text" name="geolocation[administrative_area_level_2]" id="administrative_area_level_2" rows="1" size="28" value="'.$administrative_area_level_2.'" class="geotextinput"/></td></tr>';
+    	$html .=         '<tr><td>Province (adm1)</td>';
+        $html .=         '<td><input type="text" name="geolocation[administrative_area_level_1]" id="administrative_area_level_1" rows="1" size="28" value="'.$administrative_area_level_1.'" class="geotextinput"/></td></tr>';
+    	$html .=         '<tr><td>Country</td>';
+        $html .=         '<td><input type="text" name="geolocation[country]" id="country" rows="1" size="28" value="'.$country.'" class="geotextinput"/></td><tr>';
+    	$html .=         '<tr><td>Planetary body</td>';
+        $html .=         '<td><input type="text" name="geolocation[planetary_body]" id="planetary_body" size="28" value="'.$planetary_body.'" class="geotextinput"/></td></tr>';
+//        $html .=     '</div>';
+//        $html .=     '<div class="inputs five columns omega" style="overflow: hidden;">';
+//        $html .=       '<div class="input-block">';
+//        $html .=       '</div>';
+        $html .=    '</table>';
         $html .= '</div>';
         $options = array();
         $options['form'] = array('id' => 'location_form',

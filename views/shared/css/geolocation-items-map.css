@@ -30,6 +30,7 @@
 }
 
 
+
 /* The map for the items page needs a bit of styling on it */
 #address_balloon dt {
     font-weight: bold;
@@ -43,4 +44,33 @@ div.map-notification {
     border: 1px dotted #ccc;
     text-align:center;
     font-size: 2em;
+}
+
+
+table.geo {
+    width: 100%;
+    border-collapse: collapse;
+    clear: both;
+    margin-top: 6px;
+    
+}
+
+th {
+    background-color: #D8CFB6;
+    border: 0px;
+    padding:  0em;
+    text-align: left;
+    font-weight: normal;
+}
+
+tr { background-color: rgba(255,255,255,.5); }
+    
+td {
+    border: 0px solid #E4E5DE;
+    padding: 0em;
+    vertical-align: top;
+}
+
+input.geotextinput {
+    margin: 0px;
 }
