@@ -126,7 +126,7 @@ msgstr "Blader kaart"
 
 #: GeolocationPlugin.php:379
 msgid "Find A Geographic Location For The "
-msgstr "Vind een geografische locatie voor de "
+msgstr "Vind een geografische locatie voor "
 
 #: GeolocationPlugin.php:397
 msgid "Find a Location by Address:"

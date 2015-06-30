@@ -359,6 +359,86 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $db = $this->_db;
         $select = $args['select'];
         $alias = $this->_db->getTable('Location')->getTableAlias();
+        
+        $specific_geo_search = False;
+        // go through all searchable fields
+        foreach(explode("\n", get_option("geolocation_public_search_fields")) as $geo_field){
+            $geo_field = trim($geo_field);
+            if(isset($args['params']['geolocation-'.$geo_field])) {
+                $search_value = trim($args['params']['geolocation-'.$geo_field]);
+                if ( $search_value != ''){
+                    //fire only once
+                    if ($specific_geo_search == False){
+                        $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array('latitude', 'longitude', 'address')); 
+                    }
+                        $field_type = trim($args['params']["geolocation-".$geo_field]);
+                        $select->where($geo_field . ' LIKE "%' . $field_type . '%"');
+                        $specific_geo_search = True;
+                }
+            }
+        }
+        
+        //fires when a specific place is searched for
+        if($specific_geo_search){ 
+            $select->order('id');
+        }
+        
+        if (!empty($args['params']['only_map_items'])
+            || !empty($args['params']['geolocation-address'])
+        ) {
+            $select->joinInner(
+                array($alias => $db->Location),
+                "$alias.item_id = items.id",
+                array()
+            );
+        }
+        if (!empty($args['params']['geolocation-address'])) {
+            // Get the address, latitude, longitude, and the radius from parameters
+            $address = trim($args['params']['geolocation-address']);
+            $lat = trim($args['params']['geolocation-latitude']);
+            $lng = trim($args['params']['geolocation-longitude']);
+            $radius = trim($args['params']['geolocation-radius']);
+            // Limit items to those that exist within a geographic radius if an address and radius are provided
+            if ($address != ''
+                && is_numeric($lat)
+                && is_numeric($lng)
+                && is_numeric($radius)
+            ) {
+                // SELECT distance based upon haversine forumula
+                if (get_option('geolocation_use_metric_distances')) {
+                    $denominator = 111;
+                    $earthRadius = 6371;
+                } else {
+                    $denominator = 69;
+                    $earthRadius = 3959;
+                }
+
+                $radius = $db->quote($radius, Zend_Db::FLOAT_TYPE);
+                $lat = $db->quote($lat, Zend_Db::FLOAT_TYPE);
+                $lng = $db->quote($lng, Zend_Db::FLOAT_TYPE);
+
+                $distanceFormula = new Zend_Db_Expr("($earthRadius*ACOS(COS(RADIANS($lat))*COS(RADIANS(locations.latitude))*COS(RADIANS($lng)-RADIANS(locations.longitude))+SIN(RADIANS($lat))*SIN(RADIANS(locations.latitude))))");
+
+                $select->columns(array('distance' => $distanceFormula));
+
+                // WHERE the distance is within radius miles/kilometers of the specified lat & long
+                $select->where("(locations.latitude BETWEEN $lat - $radius / $denominator AND $lat + $radius / $denominator) AND (locations.longitude BETWEEN $lng - $radius / $denominator AND $lng + $radius / $denominator)");
+
+                // Actually use distance calculation.
+                //$select->having('distance < radius');
+
+                //ORDER by the closest distances
+                $select->order('distance');
+                _log($select);
+            }
+        }
+    }
+    
+    public function hookItemsBrowseSqlOLD($args)
+    {
+        $db = $this->_db;
+        $select = $args['select'];
+        $alias = $this->_db->getTable('Location')->getTableAlias();
         $specific_geo_search = False;
         // go through all searchable fields
         foreach(explode("\n", get_option("geolocation_public_search_fields")) as $geo_field){
