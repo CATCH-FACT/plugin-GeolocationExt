@@ -51,7 +51,9 @@ OmekaMap.prototype = {
             center: new google.maps.LatLng(this.center.latitude, this.center.longitude),
             mapTypeId: google.maps.MapTypeId.ROADMAP,
             navigationControl: true,
-            mapTypeControl: true
+            mapTypeControl: true,
+            scrollwheel: false,
+            draggable: false
         };    
         switch (this.mapSize) {
         case 'small':
