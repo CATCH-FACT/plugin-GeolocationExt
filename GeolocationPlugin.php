@@ -17,7 +17,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             'define_routes',
             'after_save_item',
             'admin_items_show_sidebar',
-            'public_items_show',
+            'public_items_show_sidebar_ultimate_top',
             'admin_items_search',
             'public_items_search',
             'items_browse_sql',
@@ -308,7 +308,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         }        
     }
     
-    public function hookPublicItemsShow($args)
+    public function hookPublicItemsShowSidebarUltimateTop($args)
     {
         $view = $args['view'];
         $item = $args['item'];
@@ -318,19 +318,22 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             $data_list = $location->get_locationdata_for_public_viewing();
             $width = get_option('geolocation_item_map_width') ? get_option('geolocation_item_map_width') : '100%';
             $height = get_option('geolocation_item_map_height') ? get_option('geolocation_item_map_height') : '300px';            
-            $html = "<div id='geolocation'>";
-            $html .= '<h2>' . __("Place of narration") . '</h2>';
+            $html = '<div id="geolocation" class="element">';
+            $html .= '<h2 style="margin:0px">' . __("Place of narration") . '</h2>';
             $html .= $view->itemGoogleMap($item, $width, $height);
+            $html .= "<div class=\"element-text\"><br>";
             foreach($data_list as $loc_type => $loc_data){
                 if ($loc_data){
-                    $uri = url(array('module'=>'items','controller'=>'browse'), 'default', 
+                    $uri = html_escape(url('/solr-search?q=&facet=' . $loc_type .':"' . $loc_data . '"'));
+/*                    $uri = url(array('module'=>'items','controller'=>'browse'), 'default', 
                                     array("search" => "",
                                         "submit_search" => "Zoeken",
                                         "collection" => 1,
-                                        "geolocation-$loc_type" => $loc_data));
-                    $html .= "<a href='" . $uri . "'>".$loc_data."</a><br>";
+                                        "geolocation-$loc_type" => $loc_data));*/
+                    $html .= '<a href="' . $uri . '" style="padding:0px">' . html_escape($loc_data) . "</a>, ";
                 }
             }
+            $html .= "</div>";
             $html .= "</div>";
             echo $html;
         }
@@ -382,10 +385,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         if($specific_geo_search){ 
             $select->order('id');
         }
-        
-        if (!empty($args['params']['only_map_items'])
-            || !empty($args['params']['geolocation-address'])
-        ) {
+        //fire when map browsed and gelocation-address are not empty
+        if (!empty($args['params']['only_map_items']) || !empty($args['params']['geolocation-address'])) {
             $select->joinInner(
                 array($alias => $db->Location),
                 "$alias.item_id = items.id",
