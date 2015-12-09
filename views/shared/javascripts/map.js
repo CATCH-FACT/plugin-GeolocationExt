@@ -20,7 +20,7 @@ OmekaMap.prototype = {
         }
         options.position = new google.maps.LatLng(lat, lng);
         options.map = this.map;
-          
+         
         var marker = new google.maps.Marker(options);
         
         if (bindHtml) {
@@ -38,7 +38,7 @@ OmekaMap.prototype = {
                 infoWindow.open(this.map, marker);
             });
         }
-               
+        
         this.markers.push(marker);
         return marker;
     },
@@ -224,31 +224,73 @@ OmekaMapSingle.prototype = {
     mapSize: 'small'
 };
 
-function resetTextareas(){
+function OmekaMapMultiple(mapDivId, center, markers, options) {
+    center.show = null;
+    var omekaMap = new OmekaMap(mapDivId, center, options);
+    
+    icons = {"action_location" : "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+             "narration_location": "http://maps.google.com/mapfiles/ms/icons/red-dot.png"};
+        
+    that = this;
+    
+    jQuery.extend(true, this, omekaMap);
+
+    this.initMap();
+
+    jQuery.each(markers, function (index, marker) {
+        options.icon = icons[marker[2]];
+        that.addMarker(marker[0], marker[1], options); //, bindHtml);
+    });
+}
+
+OmekaMapMultiple.prototype = {
+    mapSize: 'small'
+};
+
+function resetCoordinatestareas(location_type){
+	jQuery("." + location_type + "_coords").val('');
+	jQuery('#planetary_body').val('Aarde');
+}
+
+function resetTextareas(location_type){
+	jQuery("." + location_type).val('');
+	jQuery('#planetary_body').val('Aarde');
+}
+
+function resetAllAreas(location_type){
+    resetTextareas(location_type)
+    resetCoordinatestareas(location_type)
+}
+
+function resetTextareasSimple(){
 	jQuery('.geotextinput').val('');
 	jQuery('#planetary_body').val('Aarde');
 }
 
-function OmekaMapForm(mapDivId, center, options) {
+
+function OmekaMapForm(mapDivId, center, options, subformId) {
+    
     var that = this;
+    console.log(that.options);
+    
     var omekaMap = new OmekaMap(mapDivId, center, options);
     jQuery.extend(true, this, omekaMap);
     this.initMap();
     
-    this.formDiv = jQuery('#' + this.options.form.id);       
+    this.formDiv = jQuery('#' + this.options.form.id);
     
-	/////////////////////////////// autocomplete
-//	window.alert("autocomplete this stuff");
-	var options = {
+    options.types = [];
+/*	var options = {
 		types: []
-	};
-	var input = document.getElementById('geolocation_address');
+	};*/
+	
+	var idRoot = subformId + "_";
+	
+	var input = document.getElementById(idRoot + 'geolocation_address');
 	var autocomplete = new google.maps.places.Autocomplete(input, options);
-	///////////////////////////////
 
-    /////////////////////////// ADD CODE FOR RETRIEVING MORE GEO DATA HERE
+    /////////////////////////// CODE FOR RETRIEVING MORE GEO DATA
 	google.maps.event.addListener(autocomplete, 'place_changed', function() {
-//		infowindow.close();
 		var place = autocomplete.getPlace();
 		var total = "";
 		if (place.address_components) {
@@ -259,12 +301,12 @@ function OmekaMapForm(mapDivId, center, options) {
 //		infowindow.setContent('<div><strong>' + place.formatted_address + '</strong><br>' + total + "<br>" + lat + "," + lng);
 //		infowindow.open(map, marker);
 		if (place.address_components) {
-			resetTextareas();
+			resetAllAreas(subformId);
 			for(var i in place.address_components) {
 				var value = (place.address_components[i] && place.address_components[i].long_name || '');
-				jQuery("#"+place.address_components[i].types[0]).val(value);
+				jQuery("#" + idRoot + place.address_components[i].types[0]).val(value);
 			}
-			jQuery("#planetary_body").val("Aarde");
+			jQuery("#" + idRoot + "planetary_body").val("Aarde");
 		}
 	});
     
@@ -274,20 +316,22 @@ function OmekaMapForm(mapDivId, center, options) {
         // If we are clicking a new spot on the map
         if (!that.options.confirmLocationChange || that.markers.length === 0 || confirm('%%Are you sure you want to change the location of the item?')) {
             var point = event.latLng;
-            var marker = that.setMarker(point);
-            jQuery('#geolocation_address').val('');
+            var marker = that.setMarker(subformId, point);
+            resetTextareas(subformId);
+            jQuery("#" + idRoot + "geolocation_address").val('');
         }
     });
 	
     // Make the map update on zoom changes.
     google.maps.event.addListener(this.map, 'zoom_changed', function () {
-        that.updateZoomForm();
+        that.updateZoomForm(subformId);
     });
 
     // Make the Find By Address button lookup the geocode of an address and add a marker.
-    jQuery('#geolocation_find_location_by_address').bind('click', function (event) {
-        var address = jQuery('#geolocation_address').val();
-        that.findAddress(address);
+    jQuery("#" + idRoot + "geolocation_find_location_by_address").bind('click', function (event) {
+//        console.log("geolocation_find_location_by_address");
+        var address = jQuery("#" + idRoot + "geolocation_address").val();
+        that.findAddress(address, subformId);
 
         //Don't submit the form
         event.stopPropagation();
@@ -297,7 +341,7 @@ function OmekaMapForm(mapDivId, center, options) {
     // Make the return key in the geolocation address input box click the button to find the address.
     jQuery('#geolocation_address').bind('keydown', function (event) {
         if (event.which == 13) {
-            jQuery('#geolocation_find_location_by_address').click();
+            jQuery("#" + idRoot + "geolocation_find_location_by_address").click();
             event.stopPropagation();
             return false;
         }
@@ -308,16 +352,18 @@ function OmekaMapForm(mapDivId, center, options) {
         this.map.setZoom(this.options.point.zoomLevel);
 
         var point = new google.maps.LatLng(this.options.point.latitude, this.options.point.longitude);
-        var marker = this.setMarker(point);
+        var marker = this.setMarker(subformId, point);
         this.map.setCenter(marker.getPosition());
     }
 }
 
 OmekaMapForm.prototype = {
     mapSize: 'large',
+    subformId: '',
     
     /* Get the geolocation of the address and add marker. */
-    findAddress: function (address) {
+    findAddress: function (address, subformId) {
+        var idRoot = subformId + "_";
         var that = this;
         if (!this.geocoder) {
             this.geocoder = new google.maps.Geocoder();
@@ -330,10 +376,10 @@ OmekaMapForm.prototype = {
                 // If required, ask the user if they want to add a marker to the geolocation point of the address.
                 // If so, add the marker, otherwise clear the address.
                 if (!that.options.confirmLocationChange || that.markers.length === 0 || confirm('Are you sure you want to change the location of the item?')) {
-                    var marker = that.setMarker(point);
+                    var marker = that.setMarker(subformId, point);
                 } else {
-                    jQuery('#geolocation_address').val('');
-                    jQuery('#geolocation_address').focus();
+                    jQuery('#' + idRoot + 'geolocation_address').val('');
+                    jQuery('#' + idRoot + 'geolocation_address').focus();
                 }
             } else {
                 // If no point was found, give us an alert
@@ -344,11 +390,11 @@ OmekaMapForm.prototype = {
     },
     
     /* Set the marker to the point. */   
-    setMarker: function (point) {
+    setMarker: function (locationType, point) {
         var that = this;
         
         // Get rid of existing markers.
-        this.clearForm();
+        this.clearForm(locationType);
         
         // Add the marker
         var marker = this.addMarker(point.lat(), point.lng());
@@ -360,35 +406,24 @@ OmekaMapForm.prototype = {
         //  Make the marker clear the form if clicked.
         google.maps.event.addListener(marker, 'click', function (event) {
             if (!that.options.confirmLocationChange || confirm('--Are you sure you want to remove the location of the item?')) {
-                that.clearForm();
+                that.clearForm(locationType);
             }
         });
         
-        this.updateForm(point);
+        this.updateForm(locationType, point);
         return marker;
     },
     
-    
     /* Update the latitude, longitude, and zoom of the form. */
-    updateFormPlus: function (point) {
-        var localityElement = document.getElementsByName('geolocation[locality]')[0];
-
-        // If we passed a point, then set the form to that. If there is no point, clear the form
-        if (point) {
-            localityElement.value = point.lat();
-
-        } else {
-            localityElement.value = '';
-        }
-    },
-    
-    
-    /* Update the latitude, longitude, and zoom of the form. */
-    updateForm: function (point) {
+    updateForm: function (locationType, point) {
 //        window.alert("form update");
-        var latElement = document.getElementsByName('geolocation[latitude]')[0];
-        var lngElement = document.getElementsByName('geolocation[longitude]')[0];
-        var zoomElement = document.getElementsByName('geolocation[zoom_level]')[0];
+//        console.log(point);
+//        console.log(locationType);
+//        console.log('geolocation[' + locationType + '][latitude]');
+
+        var latElement = document.getElementsByName('geolocation[' + locationType + '][latitude]')[0];
+        var lngElement = document.getElementsByName('geolocation[' + locationType + '][longitude]')[0];
+        var zoomElement = document.getElementsByName('geolocation[' + locationType + '][zoom_level]')[0];
         
         // If we passed a point, then set the form to that. If there is no point, clear the form
         if (point) {
@@ -404,13 +439,15 @@ OmekaMapForm.prototype = {
     },
     
     /* Update the zoom input of the form to be the current zoom on the map. */
-    updateZoomForm: function () {
-        var zoomElement = document.getElementsByName('geolocation[zoom_level]')[0];
+    updateZoomForm: function (locationType) {
+//        console.log(locationType);
+        var zoomElement = document.getElementsByName('geolocation[' + locationType + '][zoom_level]')[0];
+//        console.log("mapzoom update: " + this.map.getZoom());
         zoomElement.value = this.map.getZoom();
     },
     
     /* Clear the form of all markers. */
-    clearForm: function () {
+    clearForm: function (locationType) {
         // Remove the markers from the map
         for (var i = 0; i < this.markers.length; i++) {
             this.markers[i].setMap(null);
@@ -420,7 +457,8 @@ OmekaMapForm.prototype = {
         this.markers = [];
         
         // Update the form
-        this.updateForm();
+        console.log("update form from clearForm: " + locationType);
+        this.updateForm(locationType, null);
     },
     
     /* Resize the map and center it on the first marker. */

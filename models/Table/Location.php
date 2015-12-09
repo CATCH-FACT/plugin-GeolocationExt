@@ -35,6 +35,8 @@ class Table_Location extends Omeka_Db_Table
         // Get the locations
         $locations = $this->fetchObjects($select);
         
+//        _log(print_r($locations,true));
+        
         // If only a single location is request, return the first one found.
         if ($findOnlyOne) {
             return current($locations);
@@ -46,7 +48,7 @@ class Table_Location extends Omeka_Db_Table
         // Instead, in the future, we would have to associate an array of locations with a single item_id.         
         $indexedLocations = array();
         foreach ($locations as $k => $loc) {
-            $indexedLocations[$loc['item_id']] = $loc;
+            $indexedLocations[$loc['location_type']] = $loc;
         }
         return $indexedLocations;
     }

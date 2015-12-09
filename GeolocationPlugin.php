@@ -236,6 +236,65 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             return;
         }
 
+        // Find the location objects for the item
+        $locations = $this->_db->getTable('Location')->findLocationByItem($item, false);
+
+        // NARRATION LOCATIONS
+        $narrationGeolocationPost = $post['geolocation']['narration_location'];
+        if (!empty($narrationGeolocationPost) &&
+                (((string)$narrationGeolocationPost['latitude']) != '') &&
+                (((string)$narrationGeolocationPost['longitude']) != '')) {
+            if (!array_key_exists('narration_location', $locations)) {
+                $locations['narration_location'] = new Location;
+                $locations['narration_location']->item_id = $item->id;
+            }
+            $locations['narration_location']->setPostData($narrationGeolocationPost);
+            $locations['narration_location']->save();
+            // If the form is empty, then we want to delete whatever location is
+            // currently stored
+        } else {
+            if (array_key_exists('narration_location', $locations)) {
+                $locations['narration_location']->delete();
+            }
+        }
+
+        // ACTION LOCATIONS (we can make this smaller)
+        $actionGeolocationPost = $post['geolocation']['action_location'];
+        if (!empty($actionGeolocationPost) &&
+                (((string)$actionGeolocationPost['latitude']) != '') &&
+                (((string)$actionGeolocationPost['longitude']) != '')) {
+            if (!array_key_exists('action_location', $locations)) {
+                $locations['action_location'] = new Location;
+                $actionLocation->item_id = $item->id;
+            }
+            $locations['action_location']->setPostData($actionGeolocationPost);
+            $locations['action_location']->save();
+            // If the form is empty, then we want to delete whatever location is
+            // currently stored
+        } else {
+            if (array_key_exists('action_location', $locations)) {
+                $locations['action_location']->delete();
+            }
+        }
+
+    }
+
+    public function hookAfterSaveItemOLD($args)
+    {
+        if (!($post = $args['post'])) {
+            return;
+        }
+
+        $item = $args['record'];
+        if (!$item) {
+            $item = $args['item'];
+        }
+        
+        // If we don't have the geolocation form on the page, don't do anything!
+        if (!$post['geolocation']) {
+            return;
+        }
+
         // Find the location object for the item
         $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
 
@@ -258,31 +317,79 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             }
         }
     }
-    
-    public function hookAdminItemsShowSidebar($args)
-    {
+
+    public function _itemsShow($args){
         $view = $args['view'];
         $item = $args['item'];
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
+        $location = $this->_db->getTable('Location')->findLocationByItem($item, false); //multiple items
+
         if ($location) {
-            $data_list = $location->get_locationdata_for_public_viewing();
-            $html = '';
-            $html .= "<div id='geolocation' class='info-panel panel'>";
-            $html .= $view->itemGoogleMap($item, '224px', '270px' );
-#            $html .= $location->get_locationdata_for_public_viewing();   
-            foreach($data_list as $loc_type => $loc_data){
-                if ($loc_data){
-                    $uri = url(array('module'=>'items','controller'=>'browse'), 'default', 
-                                    array("search" => "",
-                                        "submit_search" => "Zoeken",
-                                        "collection" => 1,
-                                        "geolocation-$loc_type" => "$loc_data"));
-                    $html .= "<a href='" . $uri . "'>".$loc_data."</a><br>";
+            $html = "";
+            $width = get_option('geolocation_item_map_width') ? get_option('geolocation_item_map_width') : '100%';
+            $height = get_option('geolocation_item_map_height') ? get_option('geolocation_item_map_height') : '300px';            
+            $html = '<div id="geolocation" class="element">';
+            $html .= '  <h2 style="margin:0px">' . __("Locaties") . '</h2>';
+            if (array_key_exists("narration_location", $location) && array_key_exists("action_location", $location)){ //assuming there are 2 for now!
+                $narration_location = $location["narration_location"]->get_locationdata_for_public_viewing();
+                $action_location = $location["action_location"]->get_locationdata_for_public_viewing();
+                $html .= $view->itemGoogleMap($item, $width, $height);
+                $html .= "  <div class=\"element-text\"><br>";
+                $html .= "<b>" . __("Place of narration") . "</b><br>";
+                foreach($narration_location as $loc_type => $loc_data){
+                    if ($loc_data){
+                        $uri = html_escape(url('/solr-search?q=&facet=' . $loc_type .':"' . $loc_data . '"'));
+                        $html .= '<a href="' . $uri . '" style="padding:0px">' . html_escape($loc_data) . "</a>, ";
+                    }
                 }
-            }         
+                $html .= "<br><br><b>" . __("Place of Action") . "</b><br>";
+                foreach($action_location as $loc_type => $loc_data){
+                    if ($loc_data){
+                        $uri = html_escape(url('/solr-search?q=&facet=action_' . $loc_type .':"' . $loc_data . '"'));
+                        $html .= '<a href="' . $uri . '" style="padding:0px">' . html_escape($loc_data) . "</a>, ";
+                    }
+                }
+                $html .= "  </div>";
+            }
+            elseif (array_key_exists("narration_location", $location)){
+                $narration_location = $location["narration_location"]->get_locationdata_for_public_viewing();
+//                $data_list = $location->get_locationdata_for_public_viewing();
+                $html .= $view->itemGoogleMap($item, $width, $height);
+                $html .= "  <div class=\"element-text\"><br>";
+                $html .= "<b>" . __("Place of narration") . "</b><br>";
+                foreach($narration_location as $loc_type => $loc_data){
+                    if ($loc_data){
+                        $uri = html_escape(url('/solr-search?q=&facet=' . $loc_type .':"' . $loc_data . '"'));
+                        $html .= '<a href="' . $uri . '" style="padding:0px">' . html_escape($loc_data) . "</a>, ";
+                    }
+                }
+                $html .= "  </div>";
+            }
+            elseif (array_key_exists("action_location", $location)){
+                $action_location = $location["action_location"]->get_locationdata_for_public_viewing();
+                $html .= $view->itemGoogleMap($item, $width, $height);
+                $html .= "  <div class=\"element-text\"><br>";
+                $html .= "<b>" . __("Place of Action") . "</b><br>";
+                foreach($action_location as $loc_type => $loc_data){
+                    if ($loc_data){
+                        $uri = html_escape(url('/solr-search?q=&facet=action_' . $loc_type .':"' . $loc_data . '"'));
+                        $html .= '<a href="' . $uri . '" style="padding:0px">' . html_escape($loc_data) . "</a>, ";
+                    }
+                }
+                $html .= "  </div>";
+            }
             $html .= "</div>";
             echo $html;
-        }        
+        }
+    }
+
+    public function hookAdminItemsShowSidebar($args)
+    {
+        $this->_itemsShow($args);
+    }
+    
+    public function hookPublicItemsShowSidebarUltimateTop($args)
+    {
+        $this->_itemsShow($args);
     }
     
     public function hookPublicHead($args){
@@ -307,38 +414,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             queue_js_file('map');
         }        
     }
-    
-    public function hookPublicItemsShowSidebarUltimateTop($args)
-    {
-        $view = $args['view'];
-        $item = $args['item'];
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
 
-        if ($location) {
-            $data_list = $location->get_locationdata_for_public_viewing();
-            $width = get_option('geolocation_item_map_width') ? get_option('geolocation_item_map_width') : '100%';
-            $height = get_option('geolocation_item_map_height') ? get_option('geolocation_item_map_height') : '300px';            
-            $html = '<div id="geolocation" class="element">';
-            $html .= '<h2 style="margin:0px">' . __("Place of narration") . '</h2>';
-            $html .= $view->itemGoogleMap($item, $width, $height);
-            $html .= "<div class=\"element-text\"><br>";
-            foreach($data_list as $loc_type => $loc_data){
-                if ($loc_data){
-                    $uri = html_escape(url('/solr-search?q=&facet=' . $loc_type .':"' . $loc_data . '"'));
-/*                    $uri = url(array('module'=>'items','controller'=>'browse'), 'default', 
-                                    array("search" => "",
-                                        "submit_search" => "Zoeken",
-                                        "collection" => 1,
-                                        "geolocation-$loc_type" => $loc_data));*/
-                    $html .= '<a href="' . $uri . '" style="padding:0px">' . html_escape($loc_data) . "</a>, ";
-                }
-            }
-            $html .= "</div>";
-            $html .= "</div>";
-            echo $html;
-        }
-    }
-    
     public function hookAdminItemsSearch($args)
     {
         // Get the request object
@@ -432,64 +508,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 $select->order('distance');
                 _log($select);
             }
-        }
-    }
-    
-    public function hookItemsBrowseSqlOLD($args)
-    {
-        $db = $this->_db;
-        $select = $args['select'];
-        $alias = $this->_db->getTable('Location')->getTableAlias();
-        $specific_geo_search = False;
-        // go through all searchable fields
-        foreach(explode("\n", get_option("geolocation_public_search_fields")) as $geo_field){
-            $geo_field = trim($geo_field);
-            if(isset($args['params']['geolocation-'.$geo_field])) {
-                $search_value = trim($args['params']['geolocation-'.$geo_field]);
-                if ( $search_value != ''){
-                    //fire only once
-                    if ($specific_geo_search == False){
-                        $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array('latitude', 'longitude', 'address')); 
-                    }
-                        $field_type = trim($args['params']["geolocation-".$geo_field]);
-                        $select->where($geo_field . ' LIKE "%' . $field_type . '%"');
-                        $specific_geo_search = True;
-                }
-            }
-        }
-        //fires when a specific place is searched for
-        if($specific_geo_search){ 
-            $select->order('id');
-        }
-        else if(isset($args['params']['geolocation-address'])) {
-            
-            // Get the address, latitude, longitude, and the radius from parameters
-            $address = trim($args['params']['geolocation-address']);
-            $currentLat = trim($args['params']['geolocation-latitude']);
-            $currentLng = trim($args['params']['geolocation-longitude']);
-            $radius = trim($args['params']['geolocation-radius']);
-          
-            if ( (isset($args['params']['only_map_items']) && $args['params']['only_map_items'] ) || $address != '') {
-                //INNER JOIN the locations table
-                $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array('latitude', 'longitude', 'address'));                    
-            }
-            // Limit items to those that exist within a geographic radius if an address and radius are provided
-            if ($address != '' && is_numeric($currentLat) && is_numeric($currentLng) && is_numeric($radius)) {
-                // SELECT distance based upon haversine forumula
-                $select->columns('3956 * 2 * ASIN(SQRT(  POWER(SIN(('.$currentLat.' - locations.latitude) * pi()/180 / 2), 2) + COS('.$currentLat.' * pi()/180) *  COS(locations.latitude * pi()/180) *  POWER(SIN(('.$currentLng.' -locations.longitude) * pi()/180 / 2), 2)  )) as distance');
-                // WHERE the distance is within radius miles/kilometers of the specified lat & long
-                if (get_option('geolocation_use_metric_distances')) {
-                    $denominator = 111;
-                } else {
-                    $denominator = 69;
-                }
-                $select->where('(latitude BETWEEN '.$currentLat.' - ' . $radius . '/'.$denominator.' AND ' . $currentLat . ' + ' . $radius .  '/'.$denominator.')
-             AND (longitude BETWEEN ' . $currentLng . ' - ' . $radius . '/'.$denominator.' AND ' . $currentLng  . ' + ' . $radius .  '/'.$denominator.')');
-                //ORDER by the closest distances
-                $select->order('distance');
-            }
-        } else if( isset($args['params']['only_map_items'])) {
-            $select->joinInner(array($alias => $db->Location), "$alias.item_id = items.id", array());
         }
     }
     
@@ -617,8 +635,16 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $annotationType = $args['type'];
         $item = $args['item'];
         echo $this->_mapForm($item,
-                            __('Find A Geographic Location For The ') . $annotationType->display_name . ':', 
-                            false, 
+                            "action_location",
+                            __('Vind de ACTIELOCATIE voor dit ') . $annotationType->display_name . ':', 
+                            true, 
+                            null, 
+                            true);
+        echo "<hr>";
+        echo $this->_mapForm($item,
+                            "narration_location",
+                            __('Vind de VERTELLOCATIE voor dit: ') . $annotationType->display_name . ':', 
+                            true, 
                             null, 
                             false);
     }
@@ -633,7 +659,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
        $contributionType = $args['type'];
        echo $this->_mapForm(null, 
-                            __('Find A Geographic Location For The ') . $contributionType->display_name . ':', 
+                            "narration_location",
+                            __('Vind de vertel locatie voor dit item: ') . $contributionType->display_name . ':', 
                             false, 
                             null, 
                             true);
@@ -644,7 +671,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         _log($args['item']->id);
         $this->hookAfterSaveItem($args);
     }
-
+    
+    
     /**
      * Returns the form code for geographically searching for items
      * @param Item $item
@@ -652,7 +680,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
      * @param int $height
      * @return string
      **/    
-    protected function _mapForm($item, $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null, $input_fields_hide = false)
+    protected function _mapForm($item, $location_type, $label = 'Find a Location by Address:', $confirmLocationChange = true,  $post = null, $input_fields_hide = false)
     {
         $input_type = ($input_fields_hide ? ' style="display:none;"' : '');
         $html = '';
@@ -660,7 +688,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $center = $this->_getCenter();
         $center['show'] = false;
         
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
+        //with multiple locations possibl
+        $locations = $this->_db->getTable('Location')->findLocationByItem($item, false);
         
         if ($post === null) {
             $post = $_POST;
@@ -668,127 +697,132 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         
         $usePost = !empty($post) && !empty($post['geolocation']);
         if ($usePost) {
-            $lng  = (double) @$post['geolocation']['longitude'];
-            $lat  = (double) @$post['geolocation']['latitude'];
-            $zoom = (int) @$post['geolocation']['zoom_level'];
-            $addr = @$post['geolocation']['address'];
-	        $planetary_body = @$post['geolocation']['planetary_body'];
-	        $continent = @$post['geolocation']['continent'];
-	        $country = @$post['geolocation']['country'];
-	        $administrative_area_level_1 = @$post['geolocation']['administrative_area_level_1'];
-	        $administrative_area_level_2 = @$post['geolocation']['administrative_area_level_2'];
-	        $locality = @$post['geolocation']['locality'];
-	        $natural_feature = @$post['geolocation']['natural_feature'];
-	        $sublocality = @$post['geolocation']['sublocality'];
-	        $route = @$post['geolocation']['route'];
-	        $point_of_interest = @$post['geolocation']['point_of_interest'];
-	        $establishment = @$post['geolocation']['establishment'];
-	        $street_number = @$post['geolocation']['street_number'];
-	        $postal_code = @$post['geolocation']['postal_code'];
-	        $postal_code_prefix = @$post['geolocation']['postal_code_prefix'];
+            $lng  = (double) @$post['geolocation'][$location_type]['longitude'];
+            $lat  = (double) @$post['geolocation'][$location_type]['latitude'];
+            $zoom = (int) @$post['geolocation'][$location_type]['zoom_level'];
+            $addr = @$post['geolocation'][$location_type]['address'];
+	        $planetary_body = @$post['geolocation'][$location_type]['planetary_body'];
+	        $continent = @$post['geolocation'][$location_type]['continent'];
+	        $country = @$post['geolocation'][$location_type]['country'];
+	        $administrative_area_level_1 = @$post['geolocation'][$location_type]['administrative_area_level_1'];
+	        $administrative_area_level_2 = @$post['geolocation'][$location_type]['administrative_area_level_2'];
+	        $locality = @$post['geolocation'][$location_type]['locality'];
+	        $natural_feature = @$post['geolocation'][$location_type]['natural_feature'];
+	        $sublocality = @$post['geolocation'][$location_type]['sublocality'];
+	        $route = @$post['geolocation'][$location_type]['route'];
+	        $point_of_interest = @$post['geolocation'][$location_type]['point_of_interest'];
+	        $establishment = @$post['geolocation'][$location_type]['establishment'];
+	        $street_number = @$post['geolocation'][$location_type]['street_number'];
+	        $postal_code = @$post['geolocation'][$location_type]['postal_code'];
+	        $postal_code_prefix = @$post['geolocation'][$location_type]['postal_code_prefix'];
         } else {
-            if ($location) {
-                $lng  = (double) $location['longitude'];
-                $lat  = (double) $location['latitude'];
-                $zoom = (int) $location['zoom_level'];
-                $addr = $location['address'];
-		        $planetary_body = $location['planetary_body'];
-		        $continent = $location['continent'];
-		        $country = $location['country'];
-		        $administrative_area_level_1 = $location['administrative_area_level_1'];
-		        $administrative_area_level_2 = $location['administrative_area_level_2'];
-		        $locality = $location['locality'];
-		        $natural_feature = $location['natural_feature'];
-		        $sublocality = $location['sublocality'];
-		        $route = $location['route'];
-		        $point_of_interest = $location['point_of_interest'];
-		        $establishment = $location['establishment'];
-		        $street_number = $location['street_number'];
-		        $postal_code = $location['postal_code'];
-		        $postal_code_prefix = $location['postal_code_prefix'];
-            } else {
-                $lng = $lat = $zoom = $addr = $planetary_body = $natural_feature = $continent = $country = $administrative_area_level_1 = $administrative_area_level_2 = $locality = $sublocality = $route = $point_of_interest = $establishment = $street_number = $postal_code = $postal_code_prefix = '';
+            $lng = $lat = $zoom = $addr = $planetary_body = $natural_feature = $continent = $country = $administrative_area_level_1 = $administrative_area_level_2 = $locality = $sublocality = $route = $point_of_interest = $establishment = $street_number = $postal_code = $postal_code_prefix = '';
+            if ($locations) { //check if there is a location
+                if (array_key_exists($location_type, $locations)) {
+                    $location = $locations[$location_type];
+                    $lng  = (double) $location['longitude'];
+                    $lat  = (double) $location['latitude'];
+                    $zoom = (int) $location['zoom_level'];
+                    $addr = $location['address'];
+    		        $planetary_body = $location['planetary_body'];
+    		        $continent = $location['continent'];
+    		        $country = $location['country'];
+    		        $administrative_area_level_1 = $location['administrative_area_level_1'];
+    		        $administrative_area_level_2 = $location['administrative_area_level_2'];
+    		        $locality = $location['locality'];
+    		        $natural_feature = $location['natural_feature'];
+    		        $sublocality = $location['sublocality'];
+    		        $route = $location['route'];
+    		        $point_of_interest = $location['point_of_interest'];
+    		        $establishment = $location['establishment'];
+    		        $street_number = $location['street_number'];
+    		        $postal_code = $location['postal_code'];
+    		        $postal_code_prefix = $location['postal_code_prefix'];
+                }
             }
         }
         
+        $mapFormId = js_escape('omeka-map-form-' . $location_type);
+        $name_root = "geolocation[$location_type]";
+        $id_root = $location_type . "_";
+        $class = $location_type;
+        $coordinateClass = $location_type . "_coords";
+        
         $html .= '<div class="field" >';
-        $html .=     '<div id="location_form" class="two columns alpha">';
+        $html .=     '<div id="location_form" class="five columns alpha">';
         $html .=         '<label>' . html_escape($label) . '</label>';
         $html .=     '</div>';
-        $html .=     '<div class="inputs five columns omega">';
-        $html .=          '<div class="input-block">';
-        $html .=            '<input type="text" name="geolocation[address]" id="geolocation_address" value="' . $addr . '" class="textinput" onKeypress="resetTextareas();"/>';
-        $html .=            '<button type="button" style="margin-bottom: 18px; float:none;" name="geolocation_find_location_by_address" id="geolocation_find_location_by_address">Find</button>';        
-        $html .=          '</div>';
+        $html .=     '<div class="five columns omega">';
+        $html .=            '<input type="text" name="' . $name_root . '[address]" id="'. $id_root .'geolocation_address" value="' . $addr . '" class="textinput" onKeypress="resetAllAreas(\'' . $location_type . '\');"/>';
+        $html .=            '<button type="button" style="margin-bottom: 18px; float:none;" name="geolocation_find_location_by_address" id="'. $id_root .'geolocation_find_location_by_address">Find</button>';
         $html .=     '</div>';
         $html .= '</div>';
-        $html .= '<div  id="omeka-map-form" style="width: 100%; height: 300px"></div>';
+        
+        $html .= '<div id=' . $mapFormId . ' style="width: 100%; height: 300px"></div>';
         
         #site for auto filled geo location information:
         $html .=      '<div class="input-block" ' . $input_type . '>';
         $html .=         '<label>' . html_escape("Latitude") . '</label>';
-        $html .=         '<input name="geolocation[latitude]" value="' . $lat . '" class="coordinput"/>';
+        $html .=         '<input name="' . $name_root . '[latitude]" value="' . $lat . '" class="' . $coordinateClass . '"/>';
         $html .=         '<label>' . html_escape("Longitude") . '</label>';
-        $html .=         '<input name="geolocation[longitude]" value="' . $lng . '" class="coordinput"/>';
+        $html .=         '<input name="' . $name_root . '[longitude]" value="' . $lng . '" class="' . $coordinateClass . '"/>';
         $html .=         '<label>' . html_escape("Zoom") . '</label>';
-        $html .=         '<input name="geolocation[zoom_level]" value="' . $zoom . '" size="2" class="coordinput"/>';
-        $html .=         '<input type="hidden" name="geolocation[map_type]" value="Google Maps v' . GOOGLE_MAPS_API_VERSION . '" /><br>';
+        $html .=         '<input name="' . $name_root . '[zoom_level]" value="' . $zoom . '" class="' . $coordinateClass . '"  size="2"/>';
+        $html .=         '<input name="' . $name_root . '[map_type]" value="Google Maps v' . GOOGLE_MAPS_API_VERSION . '" type="hidden"/><br>';
+        $html .=         '<input name="' . $name_root . '[location_type]" value="' . $location_type . '" type="hidden"/><br>';
         $html .=     '</div>';
 
         $html .= '<div class="field" ' . $input_type . '>';
         $html .=     '<table id="location_form" class="geo" style="float:left;">';
         $html .=         '<tr><td>Address</td>';
-        $html .=         '<td><input type="text" name="geolocation[route]" id="route" rows="1" size="20" value="'.$route.'" class="geotextinput"/></td></tr>';
+        $html .=         '<td><input type="text" name="' . $name_root . '[route]" id="'. $id_root .'route" rows="1" size="20" value="'.$route.'" class="' . $class . '"/></td></tr>';
         $html .=         '<tr><td>Streetnumber</td>';
-        $html .=         '<td><input type="text" name="geolocation[street_number]" id="street_number" rows="1" size="4" value="'.$street_number.'" class="geotextinput"/></td></tr>';
+        $html .=         '<td><input type="text" name="' . $name_root . '[street_number]" id="'. $id_root .'street_number" rows="1" size="4" value="'.$street_number.'" class="' . $class . '"/></td></tr>';
     	$html .=         '<tr><td>Postal code</td>';
-    	$html .=         '<td><input type="text" name="geolocation[postal_code]" id="postal_code" rows="1" size="12" value="'.$postal_code.'" class="geotextinput"/></td></tr>';
+    	$html .=         '<td><input type="text" name="' . $name_root . '[postal_code]" id="'. $id_root .'postal_code" rows="1" size="12" value="'.$postal_code.'" class="' . $class . '"/></td></tr>';
     	$html .=         '<tr><td>Postal code prefix</td>';
-    	$html .=         '<td><input type="text" name="geolocation[postal_code_prefix]" id="postal_code_prefix" rows="1" size="12" value="'.$postal_code_prefix.'" class="geotextinput"/></td></tr>';
+    	$html .=         '<td><input type="text" name="' . $name_root . '[postal_code_prefix]" id="'. $id_root .'postal_code_prefix" rows="1" size="12" value="'.$postal_code_prefix.'" class="' . $class . '"/></td></tr>';
     	$html .=         '<tr><td>Sublocality</td>';
-        $html .=         '<td><input type="text" name="geolocation[sublocality]" id="sublocality" rows="1" size="28" value="'.$sublocality.'" class="geotextinput"/></td></tr>';
+        $html .=         '<td><input type="text" name="' . $name_root . '[sublocality]" id="'. $id_root .'sublocality" rows="1" size="28" value="'.$sublocality.'" class="' . $class . '"/></td></tr>';
     	$html .=         '<tr><td>Place</td>';
-        $html .=         '<td><input type="text" name="geolocation[locality]" id="locality" rows="1" size="28" value="'.$locality.'" class="geotextinput"/></td></tr>';
+        $html .=         '<td><input type="text" name="' . $name_root . '[locality]" id="'. $id_root .'locality" rows="1" size="28" value="'.$locality.'" class="' . $class . '"/></td></tr>';
     	$html .=         '<tr><td>Natural feature</td>';
-        $html .=         '<td><input type="text" name="geolocation[natural_feature]" id="natural_feature" rows="1" size="28" value="'.$natural_feature.'" class="geotextinput"/></td></tr>';
+        $html .=         '<td><input type="text" name="' . $name_root . '[natural_feature]" id="'. $id_root .'natural_feature" rows="1" size="28" value="'.$natural_feature.'" class="' . $class . '"/></td></tr>';
     	$html .=         '<tr><td>Establishment</td>';
-        $html .=         '<td><input type="text" name="geolocation[establishment]" id="establishment" rows="1" size="28" value="'.$establishment.'" class="geotextinput"/></td></tr>';	
+        $html .=         '<td><input type="text" name="' . $name_root . '[establishment]" id="'. $id_root .'establishment" rows="1" size="28" value="'.$establishment.'" class="' . $class . '"/></td></tr>';	
     	$html .=         '<tr><td>County (adm2)</td>';
-        $html .=         '<td><input type="text" name="geolocation[administrative_area_level_2]" id="administrative_area_level_2" rows="1" size="28" value="'.$administrative_area_level_2.'" class="geotextinput"/></td></tr>';
+        $html .=         '<td><input type="text" name="' . $name_root . '[administrative_area_level_2]" id="'. $id_root .'administrative_area_level_2" rows="1" size="28" value="'.$administrative_area_level_2.'" class="' . $class . '"/></td></tr>';
     	$html .=         '<tr><td>Province (adm1)</td>';
-        $html .=         '<td><input type="text" name="geolocation[administrative_area_level_1]" id="administrative_area_level_1" rows="1" size="28" value="'.$administrative_area_level_1.'" class="geotextinput"/></td></tr>';
+        $html .=         '<td><input type="text" name="' . $name_root . '[administrative_area_level_1]" id="'. $id_root .'administrative_area_level_1" rows="1" size="28" value="'.$administrative_area_level_1.'" class="' . $class . '"/></td></tr>';
     	$html .=         '<tr><td>Country</td>';
-        $html .=         '<td><input type="text" name="geolocation[country]" id="country" rows="1" size="28" value="'.$country.'" class="geotextinput"/></td><tr>';
+        $html .=         '<td><input type="text" name="' . $name_root . '[country]" id="'. $id_root .'country" rows="1" size="28" value="'.$country.'" class="' . $class . '"/></td><tr>';
     	$html .=         '<tr><td>Planetary body</td>';
-        $html .=         '<td><input type="text" name="geolocation[planetary_body]" id="planetary_body" size="28" value="'.$planetary_body.'" class="geotextinput"/></td></tr>';
-//        $html .=     '</div>';
-//        $html .=     '<div class="inputs five columns omega" style="overflow: hidden;">';
-//        $html .=       '<div class="input-block">';
-//        $html .=       '</div>';
+        $html .=         '<td><input type="text" name="' . $name_root . '[planetary_body]" id="'. $id_root .'planetary_body" size="28" value="'.$planetary_body.'" class="' . $class . '"/></td></tr>';
         $html .=    '</table>';
         $html .= '</div>';
+        
         $options = array();
-        $options['form'] = array('id' => 'location_form',
+        $options['form'] = array('id' => $location_type,
                                 'posted' => $usePost);
-        if ($location or $usePost) {
+        if ($locations or $usePost) {
             $options['point'] = array('latitude' => $lat,
                                         'longitude' => $lng,
                                         'zoomLevel' => $zoom);
         }
         
         $options['confirmLocationChange'] = $confirmLocationChange;
-        
         $center = js_escape($center);
-        $options = js_escape($options);        
-
-        $js = "var anOmekaMapForm = new OmekaMapForm(" . js_escape('omeka-map-form') . ", $center, $options);";
-        $js .= "
+        $options = js_escape($options);
+        $location_type = js_escape($location_type);
+        
+        $js = "
+            var anOmekaMapForm = new OmekaMapForm($mapFormId , $center, $options, $location_type);
             jQuery(document).bind('omeka:tabselected', function () {
                 anOmekaMapForm.resize();
             });                        
         ";
         
-        $html .= "<script type='text/javascript'>" . $js . "</script>";
+        $html .= "\n<script type='text/javascript'>" . $js . "</script>";
         return $html;
     }
     

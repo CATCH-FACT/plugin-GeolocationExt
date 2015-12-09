@@ -12,6 +12,8 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
     public $zoom_level;
     public $map_type;
 
+    public $location_type;                  #possibility to add multiple locations per item
+
 	public $point_of_interest;             #spot
 	public $route;                         #straat
 	public $sublocality;                   #stadsdeel
@@ -29,7 +31,7 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
     public $postal_code;
     public $postal_code_prefix;
     
-    public $address;
+    public $address;                    #search value saved as well
     
     protected function _validate()
     {
@@ -59,6 +61,7 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
                             "country" => $this->country,
                             "continent" => $this->continent,
                             "planetary_body" => $this->planetary_body,
+                            "location_type" => $this->location_type,
                             );
         return $view_items;
     }
@@ -85,6 +88,7 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
                             "country" => $this->country,
                             "continent" => $this->continent,
                             "planetary_body" => $this->planetary_body,
+                            "location_type" => $this->location_type,
                             );
         return $view_items;
     }
