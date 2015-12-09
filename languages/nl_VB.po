@@ -176,6 +176,9 @@ msgstr "Geografische radius (kilometers)"
 msgid "Place of narration"
 msgstr "Plaats van vertellen"
 
+msgid "Place of action"
+msgstr "Plaats van handelen"
+
 #: views/shared/advanced-search-partial.php:46
 msgid "route"
 msgstr "Straat"

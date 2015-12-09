@@ -347,7 +347,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                         $uri = html_escape(url('/solr-search?q=&facet=action_' . $loc_type .':"' . $loc_data . '"'));
                         $html .= '<a href="' . $uri . '" style="padding:0px">' . html_escape($loc_data) . "</a>, ";
                     }
-                }
+                }   
                 $html .= "  </div>";
             }
             elseif (array_key_exists("narration_location", $location)){
@@ -537,8 +537,9 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     {
         // insert the map tab before the Miscellaneous tab
         $item = $args['item'];
-        $tabs['Vertelplaats'] = $this->_mapForm($item);
         
+        $tabs[__('Place of narration')] = $this->_mapForm($item, "narration_location");
+        $tabs[__('Place of action')] = $this->_mapForm($item, "action_location");
         return $tabs;     
     }
     
@@ -636,14 +637,14 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $item = $args['item'];
         echo $this->_mapForm($item,
                             "action_location",
-                            __('Vind de ACTIELOCATIE voor dit ') . $annotationType->display_name . ':', 
+                            __('Vind de ACTIELOCATIE voor ') . $annotationType->display_name . ':', 
                             true, 
                             null, 
                             true);
         echo "<hr>";
         echo $this->_mapForm($item,
                             "narration_location",
-                            __('Vind de VERTELLOCATIE voor dit: ') . $annotationType->display_name . ':', 
+                            __('Vind de VERTELLOCATIE voor ') . $annotationType->display_name . ':', 
                             true, 
                             null, 
                             false);
@@ -660,7 +661,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
        $contributionType = $args['type'];
        echo $this->_mapForm(null, 
                             "narration_location",
-                            __('Vind de vertel locatie voor dit item: ') . $contributionType->display_name . ':', 
+                            __('Vind de VERTELLOCATIE voor ') . $contributionType->display_name . ':', 
                             false, 
                             null, 
                             true);
