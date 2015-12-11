@@ -265,7 +265,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
                 (((string)$actionGeolocationPost['longitude']) != '')) {
             if (!array_key_exists('action_location', $locations)) {
                 $locations['action_location'] = new Location;
-                $actionLocation->item_id = $item->id;
+                $locations['action_location']->item_id = $item->id;
+//                $actionLocation->item_id = $item->id;
             }
             $locations['action_location']->setPostData($actionGeolocationPost);
             $locations['action_location']->save();

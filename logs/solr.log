@@ -1147,3 +1147,30 @@ INFO  - 2015-12-11 14:13:29.120; org.apache.solr.core.QuerySenderListener; Query
 INFO  - 2015-12-11 14:13:29.121; org.apache.solr.core.SolrCore; [omeka] Registered new searcher Searcher@126b17f0 main{StandardDirectoryReader(segments_ama:52813:nrt _jlf(4.6):C44717/1:delGen=1 _jlg(4.6):C1)}
 INFO  - 2015-12-11 14:13:29.121; org.apache.solr.update.processor.LogUpdateProcessor; [omeka] webapp=/solr path=/update params={wt=json} {commit=} 0 315
 INFO  - 2015-12-11 14:13:29.124; org.apache.solr.update.DirectUpdateHandler2; start commit{,optimize=true,openSearcher=true,waitSearcher=true,expungeDeletes=false,softCommit=false,prepareCommit=false}
+INFO  - 2015-12-11 14:14:20.530; org.apache.solr.core.SolrDeletionPolicy; SolrDeletionPolicy.onCommit: commits: num=2
+	commit{dir=NRTCachingDirectory(org.apache.lucene.store.NIOFSDirectory@/Applications/MAMP/solr4.6/omeka/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@56ad4264; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_ama,generation=13762}
+	commit{dir=NRTCachingDirectory(org.apache.lucene.store.NIOFSDirectory@/Applications/MAMP/solr4.6/omeka/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@56ad4264; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_amb,generation=13763}
+INFO  - 2015-12-11 14:14:20.602; org.apache.solr.core.SolrDeletionPolicy; newest commit generation = 13763
+INFO  - 2015-12-11 14:14:21.992; org.apache.solr.search.SolrIndexSearcher; Opening Searcher@2292e7c6 main
+INFO  - 2015-12-11 14:14:21.993; org.apache.solr.update.DirectUpdateHandler2; end_commit_flush
+INFO  - 2015-12-11 14:14:21.993; org.apache.solr.core.QuerySenderListener; QuerySenderListener sending requests to Searcher@2292e7c6 main{StandardDirectoryReader(segments_amb:52815:nrt _jlh(4.6):C44717)}
+INFO  - 2015-12-11 14:14:21.994; org.apache.solr.core.QuerySenderListener; QuerySenderListener done.
+INFO  - 2015-12-11 14:14:21.996; org.apache.solr.core.SolrCore; [omeka] Registered new searcher Searcher@2292e7c6 main{StandardDirectoryReader(segments_amb:52815:nrt _jlh(4.6):C44717)}
+INFO  - 2015-12-11 14:14:22.023; org.apache.solr.update.processor.LogUpdateProcessor; [omeka] webapp=/solr path=/update params={wt=json} {optimize=} 0 52899
+INFO  - 2015-12-11 14:19:02.645; org.apache.solr.update.processor.LogUpdateProcessor; [omeka] webapp=/solr path=/update params={wt=json} {add=[Item_72570 (1520267367573094400)]} 0 122
+INFO  - 2015-12-11 14:19:02.735; org.apache.solr.update.DirectUpdateHandler2; start commit{,optimize=false,openSearcher=true,waitSearcher=true,expungeDeletes=false,softCommit=false,prepareCommit=false}
+INFO  - 2015-12-11 14:19:02.985; org.apache.solr.core.SolrDeletionPolicy; SolrDeletionPolicy.onCommit: commits: num=2
+	commit{dir=NRTCachingDirectory(org.apache.lucene.store.NIOFSDirectory@/Applications/MAMP/solr4.6/omeka/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@56ad4264; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_amb,generation=13763}
+	commit{dir=NRTCachingDirectory(org.apache.lucene.store.NIOFSDirectory@/Applications/MAMP/solr4.6/omeka/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@56ad4264; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_amc,generation=13764}
+INFO  - 2015-12-11 14:19:03.014; org.apache.solr.core.SolrDeletionPolicy; newest commit generation = 13764
+INFO  - 2015-12-11 14:19:03.106; org.apache.solr.search.SolrIndexSearcher; Opening Searcher@2d224074 main
+INFO  - 2015-12-11 14:19:03.109; org.apache.solr.update.DirectUpdateHandler2; end_commit_flush
+INFO  - 2015-12-11 14:19:03.109; org.apache.solr.core.QuerySenderListener; QuerySenderListener sending requests to Searcher@2d224074 main{StandardDirectoryReader(segments_amc:52817:nrt _jlh(4.6):C44717 _jli(4.6):C1)}
+INFO  - 2015-12-11 14:19:03.110; org.apache.solr.core.QuerySenderListener; QuerySenderListener done.
+INFO  - 2015-12-11 14:19:03.113; org.apache.solr.core.SolrCore; [omeka] Registered new searcher Searcher@2d224074 main{StandardDirectoryReader(segments_amc:52817:nrt _jlh(4.6):C44717 _jli(4.6):C1)}
+INFO  - 2015-12-11 14:19:03.114; org.apache.solr.update.processor.LogUpdateProcessor; [omeka] webapp=/solr path=/update params={wt=json} {commit=} 0 380
+INFO  - 2015-12-11 14:19:03.116; org.apache.solr.update.DirectUpdateHandler2; start commit{,optimize=true,openSearcher=true,waitSearcher=true,expungeDeletes=false,softCommit=false,prepareCommit=false}
+INFO  - 2015-12-11 14:19:59.128; org.apache.solr.core.SolrDeletionPolicy; SolrDeletionPolicy.onCommit: commits: num=2
+	commit{dir=NRTCachingDirectory(org.apache.lucene.store.NIOFSDirectory@/Applications/MAMP/solr4.6/omeka/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@56ad4264; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_amc,generation=13764}
+	commit{dir=NRTCachingDirectory(org.apache.lucene.store.NIOFSDirectory@/Applications/MAMP/solr4.6/omeka/data/index lockFactory=org.apache.lucene.store.NativeFSLockFactory@56ad4264; maxCacheMB=48.0 maxMergeSizeMB=4.0),segFN=segments_amd,generation=13765}
+INFO  - 2015-12-11 14:19:59.367; org.apache.solr.core.SolrDeletionPolicy; newest commit generation = 13765
