@@ -165,7 +165,7 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
     public function hookConfigForm()
     {
         #update the available search fields
-        if (get_option("geolocation_public_search_fields") == ""){set_option("geolocation_public_search_fields", implode("\n",$this->_all_geo_fields));}
+        if (get_option("geolocation_public_search_fields") == ""){set_option("geolocation_public_search_fields", implode("\n", $this->_all_geo_fields));}
         include 'config_form.php';        
     }
     
@@ -280,45 +280,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
     }
 
-    public function hookAfterSaveItemOLD($args)
-    {
-        if (!($post = $args['post'])) {
-            return;
-        }
-
-        $item = $args['record'];
-        if (!$item) {
-            $item = $args['item'];
-        }
-        
-        // If we don't have the geolocation form on the page, don't do anything!
-        if (!$post['geolocation']) {
-            return;
-        }
-
-        // Find the location object for the item
-        $location = $this->_db->getTable('Location')->findLocationByItem($item, true);
-
-        // If we have filled out info for the geolocation, then submit to the db
-        $geolocationPost = $post['geolocation'];
-        if (!empty($geolocationPost) &&
-                        (((string)$geolocationPost['latitude']) != '') &&
-                        (((string)$geolocationPost['longitude']) != '')) {
-            if (!$location) {
-                $location = new Location;
-                $location->item_id = $item->id;
-            }
-            $location->setPostData($geolocationPost);
-            $location->save();
-            // If the form is empty, then we want to delete whatever location is
-            // currently stored
-        } else {
-            if ($location) {
-                $location->delete();
-            }
-        }
-    }
-
     public function _itemsShow($args){
         $view = $args['view'];
         $item = $args['item'];
@@ -353,7 +314,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
             }
             elseif (array_key_exists("narration_location", $location)){
                 $narration_location = $location["narration_location"]->get_locationdata_for_public_viewing();
-//                $data_list = $location->get_locationdata_for_public_viewing();
                 $html .= $view->itemGoogleMap($item, $width, $height);
                 $html .= "  <div class=\"element-text\"><br>";
                 $html .= "<b>" . __("Place of narration") . "</b><br>";
@@ -507,7 +467,6 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
 
                 //ORDER by the closest distances
                 $select->order('distance');
-                _log($select);
             }
         }
     }

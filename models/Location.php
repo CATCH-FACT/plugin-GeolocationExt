@@ -61,7 +61,7 @@ class Location extends Omeka_Record_AbstractRecord implements Zend_Acl_Resource_
                             "country" => $this->country,
                             "continent" => $this->continent,
                             "planetary_body" => $this->planetary_body,
-                            "location_type" => $this->location_type,
+//                            "location_type" => $this->location_type,
                             );
         return $view_items;
     }

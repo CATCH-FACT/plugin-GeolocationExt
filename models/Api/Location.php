@@ -208,6 +208,12 @@ class Api_Location extends Omeka_Record_Api_AbstractRecordAdapter
         } else {
             $record->map_type = '';
         }
+        if (isset($data->location_type)) {
+            $record->location_type = $data->location_type;
+        } else {
+            $record->location_type = '';
+        }
+        
         if (isset($data->address)) {
             $record->address = $data->address;
         } else {
