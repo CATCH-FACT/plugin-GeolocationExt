@@ -715,7 +715,8 @@ class GeolocationPlugin extends Omeka_Plugin_AbstractPlugin
         $html .=     '</div>';
         $html .=     '<div class="five columns omega">';
         $html .=            '<input type="text" name="' . $name_root . '[address]" id="'. $id_root .'geolocation_address" value="' . $addr . '" class="textinput" onKeypress="resetAllAreas(\'' . $location_type . '\');"/>';
-        $html .=            '<button type="button" style="margin-bottom: 18px; float:none;" name="geolocation_find_location_by_address" id="'. $id_root .'geolocation_find_location_by_address">Find</button>';
+        $html .=            '<button type="button" style="margin-bottom: 18px; float:none;" name="geolocation_find_location_by_address" id="'. $id_root .'geolocation_find_location_by_address">' . __("Find") . '</button>';
+        $html .=            '<button type="button" style="margin-bottom: 18px; float:none;" name="geolocation_empty" id="'. $id_root .'geolocation_empty" class="red button">' . __("Reset") . '</button>';
         $html .=     '</div>';
         $html .= '</div>';
         

@@ -1,4 +1,5 @@
 function OmekaMap(mapDivId, center, options) {
+    
     this.mapDivId = mapDivId;
     this.center = center;
     this.options = options;
@@ -14,7 +15,7 @@ OmekaMap.prototype = {
     center: null,
     
     addMarker: function (lat, lng, options, bindHtml)
-    {        
+    {
         if (!options) {
             options = {};
         }
@@ -82,7 +83,6 @@ OmekaMap.prototype = {
                            {title: "(" + this.center.latitude + ',' + this.center.longitude + ")"}, 
                            this.center.markerHtml);
         }
-
     }
 };
 
@@ -271,21 +271,18 @@ function resetTextareasSimple(){
 function OmekaMapForm(mapDivId, center, options, subformId) {
     
     var that = this;
-    console.log(that.options);
     
     var omekaMap = new OmekaMap(mapDivId, center, options);
-    jQuery.extend(true, this, omekaMap);
-    this.initMap();
     
+    jQuery.extend(true, this, omekaMap);
+
+    this.initMap();
+
     this.formDiv = jQuery('#' + this.options.form.id);
     
     options.types = [];
-/*	var options = {
-		types: []
-	};*/
 	
 	var idRoot = subformId + "_";
-	
 	var input = document.getElementById(idRoot + 'geolocation_address');
 	var autocomplete = new google.maps.places.Autocomplete(input, options);
 
@@ -329,13 +326,26 @@ function OmekaMapForm(mapDivId, center, options, subformId) {
 
     // Make the Find By Address button lookup the geocode of an address and add a marker.
     jQuery("#" + idRoot + "geolocation_find_location_by_address").bind('click', function (event) {
-//        console.log("geolocation_find_location_by_address");
         var address = jQuery("#" + idRoot + "geolocation_address").val();
         that.findAddress(address, subformId);
 
         //Don't submit the form
         event.stopPropagation();
         return false;
+    });
+
+    //The empty button code
+    jQuery("#" + idRoot + "geolocation_empty").bind('click', function (event) {
+        if (confirm('%%Are you sure you want to reset this location completely?')) {
+            var address = jQuery("#" + idRoot + "geolocation_address").val("");
+            jQuery("." + subformId).val("");
+            jQuery("." + idRoot + "coords").val("");
+            that.initMap();
+        }
+        //Don't submit the form
+        event.stopPropagation();
+        return false;
+            
     });
 	
     // Make the return key in the geolocation address input box click the button to find the address.
@@ -348,13 +358,17 @@ function OmekaMapForm(mapDivId, center, options, subformId) {
     });
 
     // Add the existing map point.
-    if (this.options.point) {
-        this.map.setZoom(this.options.point.zoomLevel);
+    if (this.options.point) { 
+        if (this.options.point.zoomLevel) { //extra stringent check because of options.point being made somewhere
+            this.map.setZoom(this.options.point.zoomLevel);
 
-        var point = new google.maps.LatLng(this.options.point.latitude, this.options.point.longitude);
-        var marker = this.setMarker(subformId, point);
-        this.map.setCenter(marker.getPosition());
+            var point = new google.maps.LatLng(this.options.point.latitude, this.options.point.longitude);
+            var marker = this.setMarker(subformId, point);
+
+            this.map.setCenter(marker.getPosition());
+        }
     }
+
 }
 
 OmekaMapForm.prototype = {
@@ -416,10 +430,6 @@ OmekaMapForm.prototype = {
     
     /* Update the latitude, longitude, and zoom of the form. */
     updateForm: function (locationType, point) {
-//        window.alert("form update");
-//        console.log(point);
-//        console.log(locationType);
-//        console.log('geolocation[' + locationType + '][latitude]');
 
         var latElement = document.getElementsByName('geolocation[' + locationType + '][latitude]')[0];
         var lngElement = document.getElementsByName('geolocation[' + locationType + '][longitude]')[0];
@@ -440,9 +450,7 @@ OmekaMapForm.prototype = {
     
     /* Update the zoom input of the form to be the current zoom on the map. */
     updateZoomForm: function (locationType) {
-//        console.log(locationType);
         var zoomElement = document.getElementsByName('geolocation[' + locationType + '][zoom_level]')[0];
-//        console.log("mapzoom update: " + this.map.getZoom());
         zoomElement.value = this.map.getZoom();
     },
     
@@ -457,7 +465,6 @@ OmekaMapForm.prototype = {
         this.markers = [];
         
         // Update the form
-        console.log("update form from clearForm: " + locationType);
         this.updateForm(locationType, null);
     },
     
